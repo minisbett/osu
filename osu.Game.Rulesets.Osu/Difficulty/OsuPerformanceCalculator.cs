@@ -54,8 +54,8 @@ namespace osu.Game.Rulesets.Osu.Difficulty
                 // https://www.desmos.com/calculator/bc9eybdthb
                 // we use OD13.3 as maximum since it's the value at which great hitwidow becomes 0
                 // this is well beyond currently maximum achievable OD which is 12.17 (DTx2 + DA with OD11)
-                double okMultiplier = Math.Max(0.0, osuAttributes.OverallDifficulty > 0.0 ? 1 - Math.Pow(osuAttributes.OverallDifficulty / 13.33, 1.8) : 1.0);
-                double mehMultiplier = Math.Max(0.0, osuAttributes.OverallDifficulty > 0.0 ? 1 - Math.Pow(osuAttributes.OverallDifficulty / 13.33, 5) : 1.0);
+                double okMultiplier = Math.Max(0.0, osuAttributes.OverallDifficulty > 0.0 ? 1 - Math.Pow(osuAttributes.OverallDifficulty / 13.33, 1.1) : 1.0);
+                double mehMultiplier = Math.Max(0.0, osuAttributes.OverallDifficulty > 0.0 ? 1 - Math.Pow(osuAttributes.OverallDifficulty / 13.33, 3.3) : 1.0);
 
                 // As we're adding Oks and Mehs to an approximated number of combo breaks the result can be higher than total hits in specific scenarios (which breaks some calculations) so we need to clamp it.
                 effectiveMissCount = Math.Min(effectiveMissCount + countOk * okMultiplier + countMeh * mehMultiplier, totalHits);
@@ -90,6 +90,11 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
             double lengthBonus = 0.95 + 0.4 * Math.Min(1.0, totalHits / 2000.0) +
                                  (totalHits > 2000 ? Math.Log10(totalHits / 2000.0) * 0.5 : 0.0);
+
+            // Slightly nerf length bonus with relax.
+            if (score.Mods.Any(h => h is OsuModRelax))
+                lengthBonus *= 0.9;
+
             aimValue *= lengthBonus;
 
             // Penalize misses by assessing # of misses relative to the total # of objects. Default a 3% reduction for any # of misses.
@@ -104,8 +109,12 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             else if (attributes.ApproachRate < 8.0)
                 approachRateFactor = 0.05 * (8.0 - attributes.ApproachRate);
 
+            // Handle approach rate factor with relax differently.
             if (score.Mods.Any(h => h is OsuModRelax))
-                approachRateFactor = 0.0;
+                if (attributes.ApproachRate > 10.33)
+                    approachRateFactor = 0.15 * (attributes.ApproachRate - 10.33);
+                else if (attributes.ApproachRate < 8.0)
+                    approachRateFactor = 0.03 * (8.0 - attributes.ApproachRate);
 
             aimValue *= 1.0 + approachRateFactor * lengthBonus; // Buff for longer maps with high AR.
 
@@ -129,7 +138,11 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
             aimValue *= accuracy;
             // It is important to consider accuracy difficulty when scaling with accuracy.
-            aimValue *= 0.98 + Math.Pow(attributes.OverallDifficulty, 2) / 2500;
+            // Penalize aim pp through accuracy differently.
+            if (score.Mods.Any(h => h is OsuModRelax))
+                aimValue *= 0.96 + Math.Pow(attributes.OverallDifficulty, 2.3) / 3325;
+            else
+                aimValue *= 0.98 + Math.Pow(attributes.OverallDifficulty, 2) / 2500;
 
             return aimValue;
         }

@@ -52,7 +52,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
             if (mods.Any(h => h is OsuModRelax))
             {
-                aimRating *= 0.9;
                 speedRating = 0.0;
                 flashlightRating *= 0.7;
             }
