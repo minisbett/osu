@@ -105,12 +105,9 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             else if (attributes.ApproachRate < 8.0)
                 approachRateFactor = 0.05 * (8.0 - attributes.ApproachRate);
 
-            // Handle approach rate factor with relax differently.
+            // Nerf approach rate bonus with relax.
             if (score.Mods.Any(h => h is OsuModRelax))
-                if (attributes.ApproachRate > 10.33)
-                    approachRateFactor = 0.15 * (attributes.ApproachRate - 10.33);
-                else if (attributes.ApproachRate < 8.0)
-                    approachRateFactor = 0.03 * (8.0 - attributes.ApproachRate);
+                approachRateFactor *= 0.5;
 
             aimValue *= 1.0 + approachRateFactor * lengthBonus; // Buff for longer maps with high AR.
 
