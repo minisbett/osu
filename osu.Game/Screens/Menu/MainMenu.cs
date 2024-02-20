@@ -51,6 +51,8 @@ namespace osu.Game.Screens.Menu
 
         public override bool AllowExternalScreenChange => true;
 
+        public override bool? AllowGlobalTrackControl => true;
+
         private Screen songSelect;
 
         private MenuSideFlashes sideFlashes;
@@ -278,7 +280,7 @@ namespace osu.Game.Screens.Menu
 
                 sideFlashes.Delay(FADE_IN_DURATION).FadeIn(64, Easing.InQuint);
             }
-            else if (!api.IsLoggedIn)
+            else if (!api.IsLoggedIn || api.State.Value == APIState.RequiresSecondFactorAuth)
             {
                 // copy out old action to avoid accidentally capturing logo.Action in closure, causing a self-reference loop.
                 var previousAction = logo.Action;
