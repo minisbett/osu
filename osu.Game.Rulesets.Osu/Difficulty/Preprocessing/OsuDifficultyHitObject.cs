@@ -83,11 +83,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
         /// </summary>
         public double HitWindowGreat { get; private set; }
 
-        /// <summary>
-        /// Retrieves the preempt time for the object.
-        /// </summary>
-        public double ApproachRateTime { get; private set; }
-
         private readonly OsuHitObject? lastLastObject;
         private readonly OsuHitObject lastObject;
 
@@ -110,8 +105,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
             }
 
             setDistances(clockRate);
-
-            ApproachRateTime = BaseObject.TimePreempt / clockRate;
         }
 
         public double OpacityAt(double time, bool hidden)
