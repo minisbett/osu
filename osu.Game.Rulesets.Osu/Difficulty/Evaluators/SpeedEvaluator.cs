@@ -34,8 +34,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
             var osuNextObj = (OsuDifficultyHitObject?)current.Next(0);
 
             double strainTime = osuCurrObj.StrainTime;
-            double arBuff = 1.0 - 0.1 * Math.Max(0.0, 400.0 - osuCurrObj.ApproachRateTime) / 100.0;
-            double readingTime = Math.Min(osuCurrObj.StrainTime * arBuff, osuCurrObj.ApproachRateTime - reaction_time);
             double doubletapness = 1;
 
             // Nerf doubletappable doubles.
@@ -62,7 +60,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
             double travelDistance = osuPrevObj?.TravelDistance ?? 0;
             double distance = Math.Min(single_spacing_threshold, travelDistance + osuCurrObj.MinimumJumpDistance);
 
-            return doubletapness * (speedBonus + Math.Pow(distance / single_spacing_threshold, 3.5)) / readingTime;
+            return doubletapness * (speedBonus + Math.Pow(distance / single_spacing_threshold, 3.5)) / osuCurrObj.StrainTime;
         }
     }
 }

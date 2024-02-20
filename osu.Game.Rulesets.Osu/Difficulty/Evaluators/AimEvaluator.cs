@@ -125,9 +125,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
             if (withSliderTravelDistance)
                 aimStrain += sliderBonus * slider_multiplier;
 
-            double arBuff = 1.0 + 0.1 * Math.Max(0, 400 - osuCurrObj.ApproachRateTime) / 100.0;
-
-            return aimStrain * arBuff;
+            return aimStrain;
         }
 
         private static double calcWideAngleBonus(double angle) => Math.Pow(Math.Sin(3.0 / 4 * (Math.Min(5.0 / 6 * Math.PI, Math.Max(Math.PI / 6, angle)) - Math.PI / 6)), 2);
