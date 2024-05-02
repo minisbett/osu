@@ -12,7 +12,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
         /// <summary>
         /// The amount of past hit objects (including the current) to consider.
         /// </summary>
-        private const int maxobjectcount = 20;
+        private const int maxobjectcount = 16;
 
         /// <summary>
         /// The amount of iterations for the coefficient.
@@ -36,9 +36,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
                 entropy += -probability * Math.Log(probability);
             }
 
-            Console.WriteLine($"Entropy for {current.Index} is {entropy}");
-
-            return entropy;
+            return entropy * 0.4;
         }
 
         private static double p(double x, double[] deltaTimes)
@@ -46,7 +44,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
             // Calculates the coefficient for the rhythmic difference between two delta times.
             double coef(double x, double i)
                 => Enumerable.Range(1, coefiterations)
-                     .Sum(n => Math.Pow(Math.Cos(x / i * n * Math.PI), 2) / biggestPrimeFactor[n])
+                     .Sum(n => Math.Pow(Math.Cos(x / i * n * Math.PI), 8) / biggestPrimeFactor[n])
                      / Enumerable.Range(1, coefiterations).Sum(x => 1d / biggestPrimeFactor[x]);
 
             double probability = 0;
@@ -72,7 +70,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
             5,
             3,
             7,
-            2,
+            2
         };
     }
 }
