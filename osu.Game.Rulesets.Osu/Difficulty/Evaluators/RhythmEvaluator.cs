@@ -10,7 +10,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
     public static class RhythmEvaluator
     {
         private const int maxobjectcount = 20;
-        private const int piterations = 8;
+        private const int coefiterations = 8;
 
         public static double EvaluateDifficultyOf(DifficultyHitObject current)
         {
@@ -33,9 +33,9 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
         private static double p(double x, double[] deltaTimes)
         {
             double coef(double x, double i)
-                => Enumerable.Range(1, piterations)
+                => Enumerable.Range(1, coefiterations)
                      .Sum(n => Math.Pow(Math.Cos(x / i * n * Math.PI), 2) / biggestPrimeFactor[n])
-                     / Enumerable.Range(1, piterations).Sum(x => 1d / biggestPrimeFactor[x]);
+                     / Enumerable.Range(1, coefiterations).Sum(x => 1d / biggestPrimeFactor[x]);
 
             double probability = 0;
 
