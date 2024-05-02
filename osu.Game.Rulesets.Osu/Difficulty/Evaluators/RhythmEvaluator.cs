@@ -28,11 +28,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
                 entropy += -probability * Math.Log(probability);
             }
 
-            if (double.IsNaN(entropy))
-                Console.WriteLine();
-
-            Console.WriteLine($"Entropy of {current.Index} (at {current.StartTime}) is {entropy}");
-
             return entropy;
         }
 
