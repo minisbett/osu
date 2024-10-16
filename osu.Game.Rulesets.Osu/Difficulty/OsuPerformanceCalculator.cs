@@ -40,13 +40,13 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
             usingClassicSliderAccuracy = score.Mods.OfType<OsuModClassic>().Any(m => m.NoSliderHeadAccuracy.Value);
 
+            accuracy = score.Accuracy;
             scoreMaxCombo = score.MaxCombo;
             countGreat = score.Statistics.GetValueOrDefault(HitResult.Great);
             countOk = score.Statistics.GetValueOrDefault(HitResult.Ok);
             countMeh = score.Statistics.GetValueOrDefault(HitResult.Meh);
             countMiss = score.Statistics.GetValueOrDefault(HitResult.Miss);
             countLargeTickMiss = score.Statistics.GetValueOrDefault(HitResult.LargeTickMiss);
-            accuracy = calculateEffectiveAccuracy(countGreat, countOk, countMeh, countMiss, totalHits);
 
             if (!usingClassicSliderAccuracy)
                 countSliderEndsDropped = osuAttributes.SliderCount - score.Statistics.GetValueOrDefault(HitResult.SliderTailHit);
@@ -182,8 +182,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             double relevantCountGreat = Math.Max(0, countGreat - relevantTotalDiff);
             double relevantCountOk = Math.Max(0, countOk - Math.Max(0, relevantTotalDiff - countGreat));
             double relevantCountMeh = Math.Max(0, countMeh - Math.Max(0, relevantTotalDiff - countGreat - countOk));
-            double relevantCountMiss = Math.Max(0, countMiss - Math.Max(0, relevantTotalDiff - countGreat - countOk - countMeh));
-            double relevantAccuracy = attributes.SpeedNoteCount == 0 ? 0 : calculateEffectiveAccuracy(relevantCountGreat, relevantCountOk, relevantCountMeh, relevantCountMiss, attributes.SpeedNoteCount);
+            double relevantAccuracy = attributes.SpeedNoteCount == 0 ? 0 : (relevantCountGreat * 6.0 + relevantCountOk * 2.0 + relevantCountMeh) / (attributes.SpeedNoteCount * 6.0);
 
             // Scale the speed value with accuracy and OD.
             speedValue *= (0.95 + Math.Pow(attributes.OverallDifficulty, 2) / 750) * Math.Pow((accuracy + relevantAccuracy) / 2.0, (14.5 - attributes.OverallDifficulty) / 2);
@@ -206,7 +205,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
                 amountHitObjectsWithAccuracy += attributes.SliderCount;
 
             if (amountHitObjectsWithAccuracy > 0)
-                betterAccuracyPercentage = calculateEffectiveAccuracy(countGreat - (totalHits - amountHitObjectsWithAccuracy), countOk, countMeh, countMiss, amountHitObjectsWithAccuracy);
+                betterAccuracyPercentage = ((countGreat - (totalHits - amountHitObjectsWithAccuracy)) * 6 + countOk * 2 + countMeh) / (double)(amountHitObjectsWithAccuracy * 6);
             else
                 betterAccuracyPercentage = 0;
 
@@ -275,8 +274,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
             return Math.Max(countMiss, comboBasedMissCount);
         }
-
-        private double calculateEffectiveAccuracy(double countGreat, double countOk, double countMeh, double countMiss, double totalHits) => (countGreat * 6 + countOk * 2 + countMeh + countMiss * 2) / (double)(totalHits * 6);
 
         // Miss penalty assumes that a player will miss on the hardest parts of a map,
         // so we use the amount of relatively difficult sections to adjust miss penalty
