@@ -12,6 +12,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
 {
     public partial class EditorInspector : CompositeDrawable
     {
+        protected FillFlowContainer Container = null!;
         protected OsuTextFlowContainer InspectorText = null!;
 
         [Resolved]
@@ -26,10 +27,17 @@ namespace osu.Game.Screens.Edit.Compose.Components
             AutoSizeAxes = Axes.Y;
             RelativeSizeAxes = Axes.X;
 
-            InternalChild = InspectorText = new OsuTextFlowContainer
+            InternalChild = Container = new FillFlowContainer
             {
                 RelativeSizeAxes = Axes.X,
                 AutoSizeAxes = Axes.Y,
+                Children = [
+                    InspectorText = new OsuTextFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y
+                    }
+                ]
             };
         }
 

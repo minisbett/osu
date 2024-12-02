@@ -22,6 +22,7 @@ using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Edit.Tools;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
@@ -75,6 +76,7 @@ namespace osu.Game.Rulesets.Osu.Edit
         private void load()
         {
             AddInternal(DistanceSnapProvider);
+            RightToolbox.Add(new DifficultyEvaluatorInspector());
             DistanceSnapProvider.AttachToToolbox(RightToolbox);
 
             // Give a bit of breathing room around the playfield content.
