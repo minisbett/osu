@@ -15,11 +15,15 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets.Edit;
 using System;
 using osu.Game.Rulesets.Difficulty.Editor;
+using osu.Game.Screens.Edit;
 
 namespace osu.Game.Rulesets.Osu.Difficulty.Editor
 {
     internal partial class OsuDifficultyEvaluatorInspector : EditorToolboxGroup
     {
+        [Resolved]
+        private EditorClock editorClock { get; set; } = null!;
+
         [Resolved]
         private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
 
@@ -27,7 +31,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
         private OsuTextFlowContainer text = null!;
-        private OsuSpriteText selectNoteHint = null!;
 
         public OsuDifficultyEvaluatorInspector() : base("Evaluators", true) { }
 
@@ -43,11 +46,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
                 Spacing = new Vector2(5),
                 Children =
                 [
-                    selectNoteHint = new OsuSpriteText
-                    {
-                        Text = "Please select a note.",
-                        RelativeSizeAxes = Axes.X
-                    },
                     text = new OsuTextFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,
@@ -60,21 +58,16 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
         private void update()
         {
             text.Clear();
-            selectNoteHint.Show();
 
-            if (difficultyBeatmap.SelectedDifficultyHitObjects.Length != 1)
+            if (difficultyBeatmap.CurrentObject is null)
                 return;
 
-            selectNoteHint.Hide();
-
-            DifficultyHitObject diffObject = difficultyBeatmap.SelectedDifficultyHitObjects.Single();
-
-            addResult("Aim (withSliderTravelDistance = false)", AimEvaluator.EvaluateDifficultyOf(diffObject, false));
-            addResult("Aim (withSliderTravelDistance = true)", AimEvaluator.EvaluateDifficultyOf(diffObject, true));
-            addResult("Speed", SpeedEvaluator.EvaluateDifficultyOf(diffObject));
-            addResult("Rhythm", RhythmEvaluator.EvaluateDifficultyOf(diffObject));
-            addResult("Flashlight (hidden = false)", FlashlightEvaluator.EvaluateDifficultyOf(diffObject, false));
-            addResult("Flashlight (hidden = true)", FlashlightEvaluator.EvaluateDifficultyOf(diffObject, true));
+            addResult("Aim (withSliderTravelDistance = false)", AimEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, false));
+            addResult("Aim (withSliderTravelDistance = true)", AimEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, true));
+            addResult("Speed", SpeedEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject));
+            addResult("Rhythm", RhythmEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject));
+            addResult("Flashlight (hidden = false)", FlashlightEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, false));
+            addResult("Flashlight (hidden = true)", FlashlightEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, true));
         }
 
         private void addResult(string name, double value, int decimals = 5)
