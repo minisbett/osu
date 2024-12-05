@@ -12,15 +12,11 @@ using osu.Game.Graphics;
 using osu.Game.Rulesets.Edit;
 using System;
 using osu.Game.Rulesets.Difficulty.Editor;
-using osu.Game.Screens.Edit;
 
 namespace osu.Game.Rulesets.Osu.Difficulty.Editor
 {
     internal partial class OsuDifficultyEvaluatorInspector : EditorToolboxGroup
     {
-        [Resolved]
-        private EditorClock editorClock { get; set; } = null!;
-
         [Resolved]
         private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
 
