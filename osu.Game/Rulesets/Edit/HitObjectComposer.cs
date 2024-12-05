@@ -135,6 +135,10 @@ namespace osu.Game.Rulesets.Edit
 
             dependencies.CacheAs(Playfield);
 
+            EditorToolboxGroup compositionToolbox;
+            EditorToolboxGroup togglesToolbox;
+            EditorToolboxGroup hitsoundsToolbox;
+
             InternalChildren = new[]
             {
                 PlayfieldContentContainer = new Container
@@ -166,12 +170,12 @@ namespace osu.Game.Rulesets.Edit
                         {
                             Children = new Drawable[]
                             {
-                                new DifficultyHitObjectInspector(),
-                                new EditorToolboxGroup("toolbox (1-9)")
+                                compositionToolbox = new EditorToolboxGroup("toolbox (1-9)")
                                 {
                                     Child = toolboxCollection = new EditorRadioButtonCollection { RelativeSizeAxes = Axes.X }
                                 },
-                                new EditorToolboxGroup("toggles (Q~P)")
+                                new DifficultyHitObjectInspector(),
+                                togglesToolbox = new EditorToolboxGroup("toggles (Q~P)")
                                 {
                                     Child = togglesCollection = new FillFlowContainer
                                     {
@@ -181,7 +185,7 @@ namespace osu.Game.Rulesets.Edit
                                         Spacing = new Vector2(0, 5),
                                     },
                                 },
-                                new EditorToolboxGroup("bank (Shift/Alt-Q~R)")
+                                hitsoundsToolbox = new EditorToolboxGroup("bank (Shift/Alt-Q~R)")
                                 {
                                     Child = new FillFlowContainer
                                     {
@@ -258,6 +262,31 @@ namespace osu.Game.Rulesets.Edit
                     }
                 },
             };
+
+            editor.HideBasicEditorTools.BindValueChanged(hide =>
+            {
+                if (hide.NewValue)
+                    LeftToolbox.Remove(compositionToolbox, false);
+                else
+                {
+                    Drawable[] current = LeftToolbox.Children.ToArray();
+                    LeftToolbox.RemoveRange(current, false);
+                    LeftToolbox.Add(compositionToolbox);
+                    LeftToolbox.AddRange(current);
+                }
+            });
+            if (editor.HideBasicEditorTools.Value)
+                LeftToolbox.Remove(compositionToolbox, false);
+
+            editor.HideAdvancedEditorTools.BindValueChanged(hide =>
+            {
+                if (hide.NewValue)
+                    LeftToolbox.RemoveRange([togglesToolbox, hitsoundsToolbox], false);
+                else
+                    LeftToolbox.AddRange([togglesToolbox, hitsoundsToolbox]);
+            }, true);
+            if (editor.HideAdvancedEditorTools.Value)
+                LeftToolbox.RemoveRange([togglesToolbox, hitsoundsToolbox], false);
 
             toolboxCollection.Items = (CompositionTools.Prepend(new SelectTool()))
                                       .Select(t => new HitObjectCompositionToolButton(t, () => toolSelected(t)))

@@ -218,6 +218,8 @@ namespace osu.Game.Screens.Edit
         private Bindable<bool> editorTimelineShowBreaks;
         private Bindable<bool> editorTimelineShowTicks;
         private Bindable<bool> editorContractSidebars;
+        public Bindable<bool> HideBasicEditorTools { get; } = new Bindable<bool>(false);
+        public Bindable<bool> HideAdvancedEditorTools { get; } = new Bindable<bool>(true);
 
         /// <summary>
         /// This controls the opacity of components like the timelines, sidebars, etc.
@@ -427,6 +429,20 @@ namespace osu.Game.Screens.Edit
                                         Items = new MenuItem[]
                                         {
                                             new EditorMenuItem(EditorStrings.SetPreviewPointToCurrent, MenuItemType.Standard, SetPreviewPointToCurrentTime),
+                                        }
+                                    },
+                                    new MenuItem("PP Development")
+                                    {
+                                        Items = new MenuItem[]
+                                        {
+                                            new ToggleMenuItem("Hide Basic Editor Tools", MenuItemType.Highlighted)
+                                            {
+                                                State = { BindTarget = HideBasicEditorTools },
+                                            },
+                                            new ToggleMenuItem("Hide Advanced Editor Tools", MenuItemType.Highlighted)
+                                            {
+                                                State = { BindTarget = HideAdvancedEditorTools },
+                                            },
                                         }
                                     }
                                 }
