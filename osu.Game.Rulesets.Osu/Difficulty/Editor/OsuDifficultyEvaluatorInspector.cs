@@ -13,7 +13,8 @@ using osu.Game.Overlays;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets.Edit;
-using osu.Game.Rulesets.Difficulty;
+using System;
+using osu.Game.Rulesets.Difficulty.Editor;
 
 namespace osu.Game.Rulesets.Osu.Difficulty.Editor
 {
@@ -25,7 +26,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
-        private OsuTextFlowContainer evaluatorText = null!;
+        private OsuTextFlowContainer text = null!;
         private OsuSpriteText selectNoteHint = null!;
 
         public OsuDifficultyEvaluatorInspector() : base("Evaluators", true) { }
@@ -47,7 +48,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
                         Text = "Please select a note.",
                         RelativeSizeAxes = Axes.X
                     },
-                    evaluatorText = new OsuTextFlowContainer
+                    text = new OsuTextFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y
@@ -58,7 +59,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
 
         private void update()
         {
-            evaluatorText.Clear();
+            text.Clear();
             selectNoteHint.Show();
 
             if (difficultyBeatmap.SelectedDifficultyHitObjects.Length != 1)
@@ -76,16 +77,18 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
             addResult("Flashlight (hidden = true)", FlashlightEvaluator.EvaluateDifficultyOf(diffObject, true));
         }
 
-        private void addResult(string name, double value)
+        private void addResult(string name, double value, int decimals = 5)
         {
-            evaluatorText.AddParagraph($"{name}:", s =>
+            value = Math.Round(value, decimals);
+
+            text.AddParagraph($"{name}:", s =>
             {
                 s.Padding = new MarginPadding { Top = 2 };
                 s.Font = s.Font.With(size: 12);
                 s.Colour = colourProvider.Content2;
             });
 
-            evaluatorText.AddParagraph(value.ToString(), s =>
+            text.AddParagraph(value.ToString(), s =>
             {
                 s.Font = s.Font.With(weight: FontWeight.SemiBold);
                 s.Colour = colourProvider.Content1;

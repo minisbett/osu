@@ -42,7 +42,7 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.OSD;
 using osu.Game.Rulesets;
-using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Difficulty.Editor;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;

@@ -15,7 +15,7 @@ using osu.Game.Rulesets.Difficulty.Preprocessing;
 
 using osu.Game.Screens.Edit;
 
-namespace osu.Game.Rulesets.Difficulty
+namespace osu.Game.Rulesets.Difficulty.Editor
 {
     public partial class DifficultyEditorBeatmap : Component
     {
