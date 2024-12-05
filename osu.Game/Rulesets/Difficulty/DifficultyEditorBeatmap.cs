@@ -22,9 +22,6 @@ namespace osu.Game.Rulesets.Difficulty
         [Resolved]
         private EditorBeatmap editorBeatmap { get; set; } = null!;
 
-        [Resolved]
-        private Bindable<RulesetInfo> rulesetInfo { get; set; } = null!;
-
         public DifficultyCalculator DifficultyCalculator { get; private set; } = null!;
 
         public DifficultyHitObject[] SelectedDifficultyHitObjects
@@ -33,7 +30,7 @@ namespace osu.Game.Rulesets.Difficulty
         public Bindable<DifficultyHitObject[]> DifficultyHitObjects { get; } = new Bindable<DifficultyHitObject[]>([]);
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(Bindable<RulesetInfo> rulesetInfo)
         {
             DifficultyCalculator = rulesetInfo.Value.CreateInstance().CreateDifficultyCalculator(new FlatWorkingBeatmap(editorBeatmap));
 
