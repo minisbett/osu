@@ -315,16 +315,8 @@ namespace osu.Game.Rulesets.Edit
             composerFocusMode.BindValueChanged(_ =>
             {
                 // Transforms should be kept in sync with other usages of composer focus mode.
-                if (!composerFocusMode.Value)
-                {
-                    leftToolboxBackground.FadeIn(750, Easing.OutQuint);
-                    rightToolboxBackground.FadeIn(750, Easing.OutQuint);
-                }
-                else
-                {
-                    leftToolboxBackground.Delay(600).FadeTo(0.5f, 4000, Easing.OutQuint);
-                    rightToolboxBackground.Delay(600).FadeTo(0.5f, 4000, Easing.OutQuint);
-                }
+                leftToolboxBackground.FadeTo(0.5f, 0, Easing.OutQuint);
+                rightToolboxBackground.FadeTo(0.5f, 0, Easing.OutQuint);
             }, true);
         }
 
