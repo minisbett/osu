@@ -88,7 +88,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 s.Colour = colourProvider.Content2;
             });
 
-            text.AddParagraph(value?.ToString() ?? "null", s =>
+            text.AddParagraph(valueStr, s =>
             {
                 s.Font = s.Font.With(weight: FontWeight.SemiBold);
                 s.Colour = colourProvider.Content1;
