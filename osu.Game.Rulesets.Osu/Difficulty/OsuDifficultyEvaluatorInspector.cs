@@ -17,7 +17,7 @@ using osu.Game.Rulesets.Difficulty;
 
 namespace osu.Game.Rulesets.Osu.Difficulty
 {
-    internal partial class DifficultyEvaluatorInspector : EditorToolboxGroup
+    internal partial class OsuDifficultyEvaluatorInspector : EditorToolboxGroup
     {
         [Resolved]
         private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
@@ -28,7 +28,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
         private OsuTextFlowContainer evaluatorText = null!;
         private OsuSpriteText selectNoteHint = null!;
 
-        public DifficultyEvaluatorInspector() : base("Evaluators") { }
+        public OsuDifficultyEvaluatorInspector() : base("Evaluators") { }
 
         [BackgroundDependencyLoader]
         private void load()

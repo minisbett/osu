@@ -76,7 +76,7 @@ namespace osu.Game.Rulesets.Osu.Edit
         private void load()
         {
             AddInternal(DistanceSnapProvider);
-            RightToolbox.Add(new DifficultyEvaluatorInspector());
+            RightToolbox.Add(new OsuDifficultyEvaluatorInspector());
             DistanceSnapProvider.AttachToToolbox(RightToolbox);
 
             // Give a bit of breathing room around the playfield content.
