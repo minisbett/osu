@@ -8,6 +8,8 @@ using osu.Framework.Graphics;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Objects;
+
 
 
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
@@ -50,5 +52,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 DifficultyHitObjects.Value = DifficultyCalculator.CreateDifficultyHitObjects(editorBeatmap.PlayableBeatmap, 1).ToArray();
             }, 20, true);
         }
+
+        public DifficultyHitObject? FromBaseObject(HitObject obj) => DifficultyHitObjects.Value.FirstOrDefault(x => x.BaseObject == obj);
     }
 }
