@@ -15,7 +15,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Difficulty;
 
-namespace osu.Game.Rulesets.Osu.Difficulty
+namespace osu.Game.Rulesets.Osu.Difficulty.Editor
 {
     internal partial class OsuDifficultyEvaluatorInspector : EditorToolboxGroup
     {
