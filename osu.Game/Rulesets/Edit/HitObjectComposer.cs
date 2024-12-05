@@ -21,6 +21,7 @@ using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Configuration;
+using osu.Game.Rulesets.Difficulty.Editor;
 using osu.Game.Rulesets.Edit.Tools;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
@@ -165,6 +166,7 @@ namespace osu.Game.Rulesets.Edit
                         {
                             Children = new Drawable[]
                             {
+                                new DifficultyHitObjectInspector(),
                                 new EditorToolboxGroup("toolbox (1-9)")
                                 {
                                     Child = toolboxCollection = new EditorRadioButtonCollection { RelativeSizeAxes = Axes.X }

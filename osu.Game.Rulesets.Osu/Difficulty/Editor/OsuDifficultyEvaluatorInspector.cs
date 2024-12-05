@@ -28,7 +28,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
         private OsuTextFlowContainer evaluatorText = null!;
         private OsuSpriteText selectNoteHint = null!;
 
-        public OsuDifficultyEvaluatorInspector() : base("Evaluators") { }
+        public OsuDifficultyEvaluatorInspector() : base("Evaluators", true) { }
 
         [BackgroundDependencyLoader]
         private void load()

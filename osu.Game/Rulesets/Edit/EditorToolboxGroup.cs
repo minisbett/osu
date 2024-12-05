@@ -8,11 +8,13 @@ namespace osu.Game.Rulesets.Edit
 {
     public partial class EditorToolboxGroup : SettingsToolboxGroup
     {
-        public EditorToolboxGroup(string title)
+        public EditorToolboxGroup(string title, bool expanded = false)
             : base(title)
         {
             RelativeSizeAxes = Axes.X;
             Width = 1;
+
+            Expanded.Value = expanded;
         }
     }
 }
