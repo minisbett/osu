@@ -12,16 +12,12 @@ using osu.Game.Graphics;
 using osu.Game.Rulesets.Edit;
 using System.Reflection;
 using Humanizer;
-using osu.Game.Screens.Edit;
 using System;
 
 namespace osu.Game.Rulesets.Difficulty.Editor
 {
     internal partial class DifficultyHitObjectInspector : EditorToolboxGroup
     {
-        [Resolved]
-        private EditorClock editorClock { get; set; } = null!;
-
         [Resolved]
         private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
 
