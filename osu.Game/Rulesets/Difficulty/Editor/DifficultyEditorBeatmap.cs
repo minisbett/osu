@@ -22,6 +22,9 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         private Screens.Edit.Editor editor { get; set; } = null!;
 
         [Resolved]
+        private EditorClock editorClock { get; set; } = null!;
+
+        [Resolved]
         private EditorBeatmap editorBeatmap { get; set; } = null!;
 
         private DifficultyCalculator diffCalc = null!;
@@ -50,7 +53,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 if (!editor.UseTimelineIfNoSelection.Value)
                     return null;
 
-                return difficultyHitObjects.LastOrDefault(x => x.StartTime < editor.Clock.CurrentTime);
+                return difficultyHitObjects.LastOrDefault(x => x.StartTime < editorClock.CurrentTime);
             }
         }
 
@@ -71,7 +74,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 if (!editor.UseTimelineIfNoSelection.Value)
                     return null;
 
-                return timedDifficultyAttributes.LastOrDefault(x => x.Time < editor.Clock.CurrentTime);
+                return timedDifficultyAttributes.LastOrDefault(x => x.Time < editorClock.CurrentTime);
             }
         }
 
