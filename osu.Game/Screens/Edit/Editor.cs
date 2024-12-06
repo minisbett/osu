@@ -220,6 +220,7 @@ namespace osu.Game.Screens.Edit
         private Bindable<bool> editorContractSidebars;
         public Bindable<bool> HideBasicEditorTools { get; } = new Bindable<bool>(false);
         public Bindable<bool> HideAdvancedEditorTools { get; } = new Bindable<bool>(true);
+        public Bindable<bool> UseTimelineIfNoSelection { get; } = new Bindable<bool>(true);
 
         /// <summary>
         /// This controls the opacity of components like the timelines, sidebars, etc.
@@ -442,6 +443,10 @@ namespace osu.Game.Screens.Edit
                                             new ToggleMenuItem("Hide Advanced Editor Tools", MenuItemType.Highlighted)
                                             {
                                                 State = { BindTarget = HideAdvancedEditorTools },
+                                            },
+                                            new ToggleMenuItem("Use Timeline If No Selection", MenuItemType.Highlighted)
+                                            {
+                                                State = { BindTarget = UseTimelineIfNoSelection },
                                             },
                                         }
                                     }

@@ -1,9 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using System.Linq;
-using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -11,20 +9,17 @@ using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Scoring;
-using osu.Game.Scoring;
+using osu.Game.Screens.Edit;
 
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
-
-using osu.Game.Screens.Edit;
 
 namespace osu.Game.Rulesets.Difficulty.Editor
 {
     public partial class DifficultyEditorBeatmap : Component
     {
         [Resolved]
-        private EditorClock editorClock { get; set; } = null!;
+        private Screens.Edit.Editor editor { get; set; } = null!;
 
         [Resolved]
         private EditorBeatmap editorBeatmap { get; set; } = null!;
@@ -39,10 +34,11 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         private DifficultyHitObject[] selectedDifficultyHitObjects
             => difficultyHitObjects.Where(x => editorBeatmap.SelectedHitObjects.Contains(x.BaseObject)).ToArray();
 
-        /// <summary>
-        /// Returns the "current" object, which is either the only currently selected object or, if none or multiple are selected,
-        /// the object that lasted started from the current cursor position in the editor timeline.
-        /// If there is no applicable difficulty hit object for the current time, null is returned instead.
+        /// <summary> 
+        /// Returns the "current" difficulty hit object (DHO), which is either:<br/>
+        /// 1. The DHO corresponding to the currently selected hit object, if only one object is selected<br/>
+        /// 2. The last difficulty hit object from the point of the cursor position in the editor timeline (or null if there's none)<br/><br/>
+        /// If <see cref="Screens.Edit.Editor.UseTimelineIfNoSelection"/> is <see langword="false"/>, the second point is ignored, and null is returned.
         /// </summary>
         public DifficultyHitObject? CurrentObject
         {
@@ -51,14 +47,19 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 if (selectedDifficultyHitObjects.Length == 1)
                     return selectedDifficultyHitObjects[0];
 
-                return difficultyHitObjects.LastOrDefault(x => x.StartTime < editorClock.CurrentTime);
+                if (!editor.UseTimelineIfNoSelection.Value)
+                    return null;
+
+                return difficultyHitObjects.LastOrDefault(x => x.StartTime < editor.Clock.CurrentTime);
             }
         }
 
-        /// <summary>
-        /// Returns the timed difficulty attributes at the time of the selected hit object, or the current cursor position in the editor timeline.
-        /// This differs from retrieving the difficulty attributes at the time of <see cref="CurrentObject"/>, as the timed difficulty attributes
-        /// only apply at the endtime of an object. Thus, if the current object is for example a slider, it would give the next ones too early.
+        /// <summary> 
+        /// Returns the most recent timed difficulty attributes (TDA) at the time X, with X being either:<br/>
+        /// 1. The *end time* of the currently selected hit object (thus including it, since TDAs are always based on the endtime of a hit object)<br/>
+        /// 2. The current cursor position in the editor timeline (not including the the latest hit object if the cursor is not past its endtime)<br/>
+        /// If there is no most recent TDA at the time X, null is returned.<br/><br/>
+        /// If <see cref="Screens.Edit.Editor.UseTimelineIfNoSelection"/> is <see langword="false"/>, the second point is ignored, and null is returned.
         /// </summary>
         public TimedDifficultyAttributes? CurrentDifficultyAttributes
         {
@@ -67,7 +68,10 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 if (selectedDifficultyHitObjects.Length == 1)
                     return timedDifficultyAttributes.FirstOrDefault(x => x.Time == selectedDifficultyHitObjects[0].EndTime);
 
-                return timedDifficultyAttributes.LastOrDefault(x => x.Time < editorClock.CurrentTime);
+                if (!editor.UseTimelineIfNoSelection.Value)
+                    return null;
+
+                return timedDifficultyAttributes.LastOrDefault(x => x.Time < editor.Clock.CurrentTime);
             }
         }
 
@@ -77,18 +81,15 @@ namespace osu.Game.Rulesets.Difficulty.Editor
             Ruleset ruleset = rulesetInfo.Value.CreateInstance();
             diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(editorBeatmap.PlayableBeatmap));
 
-            Scheduler.AddDelayed(updateDifficultyHitObjects, 20, true);
-            Scheduler.AddDelayed(updateDifficultyAttributes, 1000, true);
-        }
+            Scheduler.AddDelayed(() =>
+            {
+                difficultyHitObjects = diffCalc.CreateDifficultyHitObjects(editorBeatmap.PlayableBeatmap, 1).ToArray();
+            }, 20, true);
 
-        private void updateDifficultyHitObjects()
-        {
-            difficultyHitObjects = diffCalc.CreateDifficultyHitObjects(editorBeatmap.PlayableBeatmap, 1).ToArray();
-        }
-
-        private void updateDifficultyAttributes()
-        {
-            timedDifficultyAttributes = diffCalc.CalculateTimed().ToArray();
+            Scheduler.AddDelayed(() =>
+            {
+                //timedDifficultyAttributes = diffCalc.CalculateTimed().ToArray();
+            }, 1000, true);
         }
 
         /// <summary>
