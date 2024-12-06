@@ -65,21 +65,6 @@ namespace osu.Game.Rulesets.Difficulty.Editor
 
             foreach (PropertyInfo property in difficultyBeatmap.CurrentDifficultyAttributes.Attributes.GetType().GetProperties())
                 addResult(property.Name.Titleize(), property.GetValue(difficultyBeatmap.CurrentDifficultyAttributes.Attributes));
-
-            PerformanceAttributes? performanceAttributes = difficultyBeatmap.CurrentPerformanceAttributes;
-            if (performanceAttributes is null)
-                return;
-
-            text.AddParagraph("Performance Attributes", s =>
-            {
-                s.Padding = new MarginPadding { Top = 4 };
-                s.Font = s.Font.With(weight: FontWeight.SemiBold);
-                s.Font = s.Font.With(size: 16);
-                s.Colour = colourProvider.Colour0;
-            });
-
-            foreach (PropertyInfo property in performanceAttributes.GetType().GetProperties())
-                addResult(property.Name.Titleize(), property.GetValue(performanceAttributes));
         }
 
         private void addResult(string name, object? value)

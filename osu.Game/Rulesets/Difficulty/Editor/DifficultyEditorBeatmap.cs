@@ -29,9 +29,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         [Resolved]
         private EditorBeatmap editorBeatmap { get; set; } = null!;
 
-        private ScoreProcessor scoreProcessor = null!;
         private DifficultyCalculator diffCalc = null!;
-        private PerformanceCalculator? perfCalc = null!;
         private DifficultyHitObject[] difficultyHitObjects = [];
         private TimedDifficultyAttributes[] timedDifficultyAttributes = [];
 
@@ -73,35 +71,11 @@ namespace osu.Game.Rulesets.Difficulty.Editor
             }
         }
 
-        /// <summary>
-        /// Returns the performance attributes at the time of the selected hit object, or the current cursor position in the editor timeline.
-        /// This uses the timed difficulty attributes from <see cref="CurrentDifficultyAttributes"/>, and is thus timed too.
-        /// </summary>
-        public PerformanceAttributes? CurrentPerformanceAttributes
-        {
-            get
-            {
-                if (CurrentDifficultyAttributes is null || perfCalc is null)
-                    return null;
-
-                scoreProcessor.ApplyBeatmap(editorBeatmap.PlayableBeatmap);
-
-                return perfCalc.Calculate(new ScoreInfo
-                {
-                    Accuracy = 1,
-                    MaxCombo = CurrentDifficultyAttributes.Attributes.MaxCombo,
-                    Statistics = scoreProcessor.MaximumStatistics
-                }, timedDifficultyAttributes.Last().Attributes);
-            }
-        }
-
         [BackgroundDependencyLoader]
         private void load(Bindable<RulesetInfo> rulesetInfo)
         {
             Ruleset ruleset = rulesetInfo.Value.CreateInstance();
-            scoreProcessor = ruleset.CreateScoreProcessor();
             diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(editorBeatmap.PlayableBeatmap));
-            perfCalc = ruleset.CreatePerformanceCalculator();
 
             Scheduler.AddDelayed(updateDifficultyHitObjects, 20, true);
             Scheduler.AddDelayed(updateDifficultyAttributes, 1000, true);
