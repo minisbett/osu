@@ -1,7 +1,9 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -9,8 +11,8 @@ using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Objects;
-
-
+using osu.Game.Rulesets.Scoring;
+using osu.Game.Scoring;
 
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
@@ -27,32 +29,99 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         [Resolved]
         private EditorBeatmap editorBeatmap { get; set; } = null!;
 
-        public DifficultyCalculator DifficultyCalculator { get; private set; } = null!;
+        private ScoreProcessor scoreProcessor = null!;
+        private DifficultyCalculator diffCalc = null!;
+        private PerformanceCalculator? perfCalc = null!;
+        private DifficultyHitObject[] difficultyHitObjects = [];
+        private TimedDifficultyAttributes[] timedDifficultyAttributes = [];
 
-        public Bindable<DifficultyHitObject[]> DifficultyHitObjects { get; } = new Bindable<DifficultyHitObject[]>([]);
-
-        public DifficultyHitObject[] SelectedDifficultyHitObjects
-            => DifficultyHitObjects.Value.Where(x => editorBeatmap.SelectedHitObjects.Contains(x.BaseObject)).ToArray();
+        /// <summary>
+        /// The difficulty hit objects corresponding to the selected hit objects. Hit objects without an equivalent are ignored.
+        /// </summary>
+        private DifficultyHitObject[] selectedDifficultyHitObjects
+            => difficultyHitObjects.Where(x => editorBeatmap.SelectedHitObjects.Contains(x.BaseObject)).ToArray();
 
         /// <summary>
         /// Returns the "current" object, which is either the only currently selected object or, if none or multiple are selected,
         /// the object that lasted started from the current cursor position in the editor timeline.
+        /// If there is no applicable difficulty hit object for the current time, null is returned instead.
         /// </summary>
-        public DifficultyHitObject? CurrentObject => SelectedDifficultyHitObjects.Length == 1
-                                                   ? SelectedDifficultyHitObjects[0]
-                                                   : DifficultyHitObjects.Value.LastOrDefault(x => x.StartTime < editorClock.CurrentTime);
+        public DifficultyHitObject? CurrentObject
+        {
+            get
+            {
+                if (selectedDifficultyHitObjects.Length == 1)
+                    return selectedDifficultyHitObjects[0];
+
+                return difficultyHitObjects.LastOrDefault(x => x.StartTime < editorClock.CurrentTime);
+            }
+        }
+
+        /// <summary>
+        /// Returns the timed difficulty attributes at the time of the selected hit object, or the current cursor position in the editor timeline.
+        /// This differs from retrieving the difficulty attributes at the time of <see cref="CurrentObject"/>, as the timed difficulty attributes
+        /// only apply at the endtime of an object. Thus, if the current object is for example a slider, it would give the next ones too early.
+        /// </summary>
+        public TimedDifficultyAttributes? CurrentDifficultyAttributes
+        {
+            get
+            {
+                if (selectedDifficultyHitObjects.Length == 1)
+                    return timedDifficultyAttributes.FirstOrDefault(x => x.Time == selectedDifficultyHitObjects[0].EndTime);
+
+                return timedDifficultyAttributes.LastOrDefault(x => x.Time < editorClock.CurrentTime);
+            }
+        }
+
+        /// <summary>
+        /// Returns the performance attributes at the time of the selected hit object, or the current cursor position in the editor timeline.
+        /// This uses the timed difficulty attributes from <see cref="CurrentDifficultyAttributes"/>, and is thus timed too.
+        /// </summary>
+        public PerformanceAttributes? CurrentPerformanceAttributes
+        {
+            get
+            {
+                if (CurrentDifficultyAttributes is null || perfCalc is null)
+                    return null;
+
+                scoreProcessor.ApplyBeatmap(editorBeatmap.PlayableBeatmap);
+
+                return perfCalc.Calculate(new ScoreInfo
+                {
+                    Accuracy = 1,
+                    MaxCombo = CurrentDifficultyAttributes.Attributes.MaxCombo,
+                    Statistics = scoreProcessor.MaximumStatistics
+                }, timedDifficultyAttributes.Last().Attributes);
+            }
+        }
 
         [BackgroundDependencyLoader]
         private void load(Bindable<RulesetInfo> rulesetInfo)
         {
-            DifficultyCalculator = rulesetInfo.Value.CreateInstance().CreateDifficultyCalculator(new FlatWorkingBeatmap(editorBeatmap));
+            Ruleset ruleset = rulesetInfo.Value.CreateInstance();
+            scoreProcessor = ruleset.CreateScoreProcessor();
+            diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(editorBeatmap.PlayableBeatmap));
+            perfCalc = ruleset.CreatePerformanceCalculator();
 
-            Scheduler.AddDelayed(() =>
-            {
-                DifficultyHitObjects.Value = DifficultyCalculator.CreateDifficultyHitObjects(editorBeatmap.PlayableBeatmap, 1).ToArray();
-            }, 20, true);
+            Scheduler.AddDelayed(updateDifficultyHitObjects, 20, true);
+            Scheduler.AddDelayed(updateDifficultyAttributes, 1000, true);
         }
 
-        public DifficultyHitObject? FromBaseObject(HitObject obj) => DifficultyHitObjects.Value.FirstOrDefault(x => x.BaseObject == obj);
+        private void updateDifficultyHitObjects()
+        {
+            difficultyHitObjects = diffCalc.CreateDifficultyHitObjects(editorBeatmap.PlayableBeatmap, 1).ToArray();
+        }
+
+        private void updateDifficultyAttributes()
+        {
+            timedDifficultyAttributes = diffCalc.CalculateTimed().ToArray();
+        }
+
+        /// <summary>
+        /// Returns the corresponding difficulty hit object for the specified hit object. If the hit object has no corresponding object, null is returned.
+        /// </summary>
+        /// <param name="obj">The hit object.</param>
+        /// <returns>The corresponding difficulty hit object.</returns>
+        public DifficultyHitObject? FromBaseObject(HitObject obj) => difficultyHitObjects.FirstOrDefault(x => x.BaseObject == obj);
     }
 }

@@ -16,7 +16,7 @@ using System;
 
 namespace osu.Game.Rulesets.Difficulty.Editor
 {
-    internal partial class DifficultyHitObjectInspector : EditorToolboxGroup
+    internal partial class DifficultyAttributesInspector : EditorToolboxGroup
     {
         [Resolved]
         private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
@@ -26,7 +26,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
 
         private OsuTextFlowContainer text = null!;
 
-        public DifficultyHitObjectInspector() : base("Difficulty Hit Object", true) { }
+        public DifficultyAttributesInspector() : base("Attributes", true) { }
 
         [BackgroundDependencyLoader]
         private void load()
@@ -53,15 +53,33 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         {
             text.Clear();
 
-            if (difficultyBeatmap.CurrentObject is null)
+            if (difficultyBeatmap.CurrentDifficultyAttributes is null)
                 return;
 
-            foreach (PropertyInfo property in difficultyBeatmap.CurrentObject.GetType().GetProperties())
-                addResult(property.Name.Titleize(), property.GetValue(difficultyBeatmap.CurrentObject));
+            text.AddParagraph("Difficulty Attributes", s =>
+            {
+                s.Font = s.Font.With(weight: FontWeight.SemiBold);
+                s.Font = s.Font.With(size: 16);
+                s.Colour = colourProvider.Colour0;
+            });
 
-            // Ignore fields where the name is all uppercase, as per naming convention their constants and it's the only way to identify them.
-            foreach (FieldInfo field in difficultyBeatmap.CurrentObject.GetType().GetFields().Where(x => x.Name.Any(x => char.IsLetter(x) && !char.IsUpper(x))))
-                addResult(field.Name.Titleize(), field.GetValue(difficultyBeatmap.CurrentObject));
+            foreach (PropertyInfo property in difficultyBeatmap.CurrentDifficultyAttributes.Attributes.GetType().GetProperties())
+                addResult(property.Name.Titleize(), property.GetValue(difficultyBeatmap.CurrentDifficultyAttributes.Attributes));
+
+            PerformanceAttributes? performanceAttributes = difficultyBeatmap.CurrentPerformanceAttributes;
+            if (performanceAttributes is null)
+                return;
+
+            text.AddParagraph("Performance Attributes", s =>
+            {
+                s.Padding = new MarginPadding { Top = 4 };
+                s.Font = s.Font.With(weight: FontWeight.SemiBold);
+                s.Font = s.Font.With(size: 16);
+                s.Colour = colourProvider.Colour0;
+            });
+
+            foreach (PropertyInfo property in performanceAttributes.GetType().GetProperties())
+                addResult(property.Name.Titleize(), property.GetValue(performanceAttributes));
         }
 
         private void addResult(string name, object? value)
@@ -70,11 +88,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
             {
                 null => "null",
                 int i => i.ToString("N0"),
-                float f => Math.Round(f, 5).ToString("N"),
                 double d => Math.Round(d, 5).ToString("N"),
-                bool b => b ? "Yes" : "No",
-                Vector2 v => $"{v.X} ; {v.Y} ({v.Length})",
-                Vector3 v => $"{v.X} ; {v.Y} ; {v.Z} ({v.Length})",
                 _ => null!
             };
 

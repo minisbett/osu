@@ -174,6 +174,7 @@ namespace osu.Game.Rulesets.Edit
                                 {
                                     Child = toolboxCollection = new EditorRadioButtonCollection { RelativeSizeAxes = Axes.X }
                                 },
+                                new DifficultyAttributesInspector(),
                                 new DifficultyHitObjectInspector(),
                                 togglesToolbox = new EditorToolboxGroup("toggles (Q~P)")
                                 {

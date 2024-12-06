@@ -30,8 +30,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
         [BackgroundDependencyLoader]
         private void load()
         {
-            difficultyBeatmap.DifficultyHitObjects.ValueChanged += _ => update();
-
             Child = new FillFlowContainer
             {
                 RelativeSizeAxes = Axes.X,
@@ -46,6 +44,8 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
                     }
                 ]
             };
+
+            Scheduler.AddDelayed(update, 20, true);
         }
 
         private void update()
