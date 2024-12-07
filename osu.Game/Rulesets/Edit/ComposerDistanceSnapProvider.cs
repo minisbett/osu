@@ -126,11 +126,12 @@ namespace osu.Game.Rulesets.Edit
             DistanceSpacingMultiplier.BindValueChanged(spacing => distanceSpacingSlider.Current.Value = spacing.NewValue);
 
             // ========== PP EDITOR ==========
+            // Hide the distance snap toolbox if advanced editor tools are hidden
             editor.HideAdvancedEditorTools.BindValueChanged(hide =>
             {
                 if (hide.NewValue)
                     toolboxContainer.Remove(toolboxGroup, false);
-                else if(!toolboxContainer.Contains(toolboxGroup))
+                else if (!toolboxContainer.Contains(toolboxGroup))
                     toolboxContainer.Add(toolboxGroup);
             }, true);
             // ========== PP EDITOR ==========

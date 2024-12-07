@@ -219,6 +219,7 @@ namespace osu.Game.Screens.Edit
         private Bindable<bool> editorTimelineShowTicks;
         private Bindable<bool> editorContractSidebars;
         // ========== PP EDITOR ==========
+        // Bindables for the menu items for configuring the PP-specific features
         public Bindable<bool> HideBasicEditorTools { get; } = new Bindable<bool>(false);
         public Bindable<bool> HideAdvancedEditorTools { get; } = new Bindable<bool>(true);
         public Bindable<bool> UseTimelineIfNoSelection { get; } = new Bindable<bool>(true);
@@ -299,6 +300,7 @@ namespace osu.Game.Screens.Edit
             dependencies.CacheAs(editorBeatmap);
 
             // ========== PP EDITOR ==========
+            // Add the difficulty provider, which provides difficulty-related info for the current editor environment
             EditorDifficultyProvider difficultyProvider = new EditorDifficultyProvider();
             AddInternal(difficultyProvider);
             dependencies.CacheAs(difficultyProvider);
@@ -437,6 +439,7 @@ namespace osu.Game.Screens.Edit
                                         }
                                     },
                                     // ========== PP EDITOR ==========
+                                    // Add configuration menu items for PP-specific features
                                     new MenuItem("PP Development")
                                     {
                                         Items = new MenuItem[]

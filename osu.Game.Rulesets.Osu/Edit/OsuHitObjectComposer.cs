@@ -76,8 +76,12 @@ namespace osu.Game.Rulesets.Osu.Edit
         [BackgroundDependencyLoader]
         private void load(Editor editor)
         {
-            AddInternal(DistanceSnapProvider);
+            // ========== PP EDITOR ==========
+            // Add the difficulty evaluator inspector the osu! ruleset
             RightToolbox.Add(new OsuDifficultyEvaluatorInspector());
+            // ========== PP EDITOR ==========
+
+            AddInternal(DistanceSnapProvider);
             DistanceSnapProvider.AttachToToolbox(RightToolbox);
 
             // Give a bit of breathing room around the playfield content.
@@ -102,26 +106,32 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             OsuGridToolboxGroup.GridType.BindValueChanged(updatePositionSnapGrid, true);
 
-            Drawable[] drawables = new Drawable[]
-            {
-                OsuGridToolboxGroup,
-                new TransformToolboxGroup
+            RightToolbox.AddRange(new Drawable[]
                 {
-                    RotationHandler = BlueprintContainer.SelectionHandler.RotationHandler,
-                    ScaleHandler = (OsuSelectionScaleHandler)BlueprintContainer.SelectionHandler.ScaleHandler,
-                    GridToolbox = OsuGridToolboxGroup,
-                },
-                new GenerateToolboxGroup(),
-                FreehandSliderToolboxGroup
-            };
+                    OsuGridToolboxGroup,
+                    new TransformToolboxGroup
+                    {
+                        RotationHandler = BlueprintContainer.SelectionHandler.RotationHandler,
+                        ScaleHandler = (OsuSelectionScaleHandler)BlueprintContainer.SelectionHandler.ScaleHandler,
+                        GridToolbox = OsuGridToolboxGroup,
+                    },
+                    new GenerateToolboxGroup(),
+                    FreehandSliderToolboxGroup
+                }
+            );
 
+
+            // ========== PP EDITOR ==========
+            // Hide grid, transform, generate and freehand slider toolboxes if advanced editor tools are hidden
+            Drawable[] drawables = Enumerable.Range(0, 4).Select(x => RightToolbox[^x]).ToArray();
             editor.HideAdvancedEditorTools.BindValueChanged(hide =>
             {
                 if (hide.NewValue)
                     RightToolbox.RemoveRange(drawables, false);
-                else
+                else if (!RightToolbox.Contains(drawables[0]))
                     RightToolbox.AddRange(drawables);
             }, true);
+            // ========== PP EDITOR ==========
         }
 
         private void updatePositionSnapGrid(ValueChangedEvent<PositionSnapGridType> obj)
