@@ -16,7 +16,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
 {
     public partial class DifficultyEvaluatorInspector : EditorToolboxGroup
     {
-        public record Evaluator(string Name, Func<DifficultyHitObject, double> EvaluateDifficultyOf);
+        protected record Evaluator(string Name, Func<DifficultyHitObject, double> EvaluateDifficultyOf);
 
         [Resolved]
         private EditorDifficultyProvider difficultyProvider { get; set; } = null!;
