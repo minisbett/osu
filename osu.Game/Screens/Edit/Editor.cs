@@ -218,9 +218,11 @@ namespace osu.Game.Screens.Edit
         private Bindable<bool> editorTimelineShowBreaks;
         private Bindable<bool> editorTimelineShowTicks;
         private Bindable<bool> editorContractSidebars;
+        // ========== PP EDITOR ==========
         public Bindable<bool> HideBasicEditorTools { get; } = new Bindable<bool>(false);
         public Bindable<bool> HideAdvancedEditorTools { get; } = new Bindable<bool>(true);
         public Bindable<bool> UseTimelineIfNoSelection { get; } = new Bindable<bool>(true);
+        // ========== PP EDITOR ==========
 
         /// <summary>
         /// This controls the opacity of components like the timelines, sidebars, etc.
@@ -296,9 +298,11 @@ namespace osu.Game.Screens.Edit
             AddInternal(editorBeatmap = new EditorBeatmap(playableBeatmap, loadableBeatmap.GetSkin(), loadableBeatmap.BeatmapInfo));
             dependencies.CacheAs(editorBeatmap);
 
+            // ========== PP EDITOR ==========
             EditorDifficultyProvider difficultyProvider = new EditorDifficultyProvider();
             AddInternal(difficultyProvider);
             dependencies.CacheAs(difficultyProvider);
+            // ========== PP EDITOR ==========
 
             editorBeatmap.UpdateInProgress.BindValueChanged(_ => updateSampleDisabledState());
 
@@ -432,6 +436,7 @@ namespace osu.Game.Screens.Edit
                                             new EditorMenuItem(EditorStrings.SetPreviewPointToCurrent, MenuItemType.Standard, SetPreviewPointToCurrentTime),
                                         }
                                     },
+                                    // ========== PP EDITOR ==========
                                     new MenuItem("PP Development")
                                     {
                                         Items = new MenuItem[]
@@ -450,6 +455,7 @@ namespace osu.Game.Screens.Edit
                                             },
                                         }
                                     }
+                                    // ========== PP EDITOR ==========
                                 }
                             },
                             screenSwitcher = new EditorScreenSwitcherControl
