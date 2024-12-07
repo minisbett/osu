@@ -72,7 +72,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
             {
                 null => "null",
                 int i => i.ToString("N0"),
-                double d => Math.Round(d, 5).ToString("N"),
+                double d => d.ToString("#,#0.#####"),
                 _ => null!
             };
 

@@ -57,29 +57,36 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 return;
 
             foreach (PropertyInfo property in difficultyProvider.CurrentObject.GetType().GetProperties())
-                addResult(property.Name.Titleize(), property.GetValue(difficultyProvider.CurrentObject));
+                addValue(property.Name.Titleize(), property.GetValue(difficultyProvider.CurrentObject));
 
             // Ignore fields where the name is all uppercase, as per naming convention their constants and it's the only way to identify them.
-            foreach (FieldInfo field in difficultyProvider.CurrentObject.GetType().GetFields().Where(x => x.Name.Any(x => char.IsLetter(x) && !char.IsUpper(x))))
-                addResult(field.Name.Titleize(), field.GetValue(difficultyProvider.CurrentObject));
+            static bool isConst(FieldInfo field) => field.Name.All(x => !char.IsLetter(x) || char.IsUpper(x));
+            foreach (FieldInfo field in difficultyProvider.CurrentObject.GetType().GetFields().Where(isConst))
+                addValue(field.Name.Titleize(), field.GetValue(difficultyProvider.CurrentObject));
         }
 
-        private void addResult(string name, object? value)
+        private void addValue(string name, object? value)
         {
             string valueStr = value switch
             {
                 null => "null",
                 int i => i.ToString("N0"),
-                float f => Math.Round(f, 5).ToString("N"),
-                double d => Math.Round(d, 5).ToString("N"),
+                float f => f.ToString("#,#0.#####"),
+                double d => d.ToString("#,#0.#####"),
                 bool b => b ? "Yes" : "No",
-                Vector2 v => $"{v.X} ; {v.Y} ({v.Length})",
-                Vector3 v => $"{v.X} ; {v.Y} ; {v.Z} ({v.Length})",
+                Vector2 v => $"{v.X} {v.Y} ({v.Length:#,#0.#})",
                 _ => null!
             };
 
             if (valueStr is null)
                 return;
+
+            valueStr += name switch
+            {
+                string s when s.EndsWith("Distance") => "px",
+                string s when s.EndsWith("Time") => "ms",
+                _ => ""
+            };
 
             text.AddParagraph($"{name}:", s =>
             {
