@@ -123,13 +123,13 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             // ========== PP EDITOR ==========
             // Hide grid, transform, generate and freehand slider toolboxes if advanced editor tools are hidden
-            Drawable[] drawables = Enumerable.Range(0, 4).Select(x => RightToolbox[^x]).ToArray();
+            Drawable[] toolboxes = [RightToolbox[^4], RightToolbox[^3], RightToolbox[^2], RightToolbox[^1]];
             editor.HideAdvancedEditorTools.BindValueChanged(hide =>
             {
                 if (hide.NewValue)
-                    RightToolbox.RemoveRange(drawables, false);
-                else if (!RightToolbox.Contains(drawables[0]))
-                    RightToolbox.AddRange(drawables);
+                    RightToolbox.RemoveRange(toolboxes, false);
+                else if (!RightToolbox.Contains(toolboxes[0]))
+                    RightToolbox.AddRange(toolboxes);
             }, true);
             // ========== PP EDITOR ==========
         }

@@ -318,6 +318,8 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         protected override IEnumerable<MenuItem> GetContextMenuItemsForSelection(IEnumerable<SelectionBlueprint<HitObject>> selection)
         {
+            // ========== PP EDITOR ==========
+            // Add context menu items for debugging a specific difficulty hit object in different evaluators
             if (selection.Count() == 1)
             {
                 DifficultyHitObject? difficultyHitObject = difficultyProvider.FromBaseObject(selection.Single().Item);
@@ -329,6 +331,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                             .ToArray()
                     };
             }
+            // ========== PP EDITOR ==========
 
             foreach (var item in base.GetContextMenuItemsForSelection(selection))
                 yield return item;
