@@ -296,9 +296,9 @@ namespace osu.Game.Screens.Edit
             AddInternal(editorBeatmap = new EditorBeatmap(playableBeatmap, loadableBeatmap.GetSkin(), loadableBeatmap.BeatmapInfo));
             dependencies.CacheAs(editorBeatmap);
 
-            DifficultyEditorBeatmap difficultyBeatmap = new DifficultyEditorBeatmap();
-            AddInternal(difficultyBeatmap);
-            dependencies.CacheAs(difficultyBeatmap);
+            EditorDifficultyProvider difficultyProvider = new EditorDifficultyProvider();
+            AddInternal(difficultyProvider);
+            dependencies.CacheAs(difficultyProvider);
 
             editorBeatmap.UpdateInProgress.BindValueChanged(_ => updateSampleDisabledState());
 

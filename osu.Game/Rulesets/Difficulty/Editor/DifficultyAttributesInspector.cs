@@ -1,7 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics;
@@ -19,7 +18,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
     internal partial class DifficultyAttributesInspector : EditorToolboxGroup
     {
         [Resolved]
-        private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
+        private EditorDifficultyProvider difficultyProvider { get; set; } = null!;
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
@@ -53,7 +52,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         {
             text.Clear();
 
-            if (difficultyBeatmap.CurrentDifficultyAttributes is null)
+            if (difficultyProvider.CurrentDifficultyAttributes is null)
                 return;
 
             text.AddParagraph("Difficulty Attributes", s =>
@@ -63,8 +62,8 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 s.Colour = colourProvider.Colour0;
             });
 
-            foreach (PropertyInfo property in difficultyBeatmap.CurrentDifficultyAttributes.Attributes.GetType().GetProperties())
-                addResult(property.Name.Titleize(), property.GetValue(difficultyBeatmap.CurrentDifficultyAttributes.Attributes));
+            foreach (PropertyInfo property in difficultyProvider.CurrentDifficultyAttributes.Attributes.GetType().GetProperties())
+                addResult(property.Name.Titleize(), property.GetValue(difficultyProvider.CurrentDifficultyAttributes.Attributes));
         }
 
         private void addResult(string name, object? value)

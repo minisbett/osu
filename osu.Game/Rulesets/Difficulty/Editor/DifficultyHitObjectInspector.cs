@@ -19,7 +19,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
     internal partial class DifficultyHitObjectInspector : EditorToolboxGroup
     {
         [Resolved]
-        private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
+        private EditorDifficultyProvider difficultyProvider { get; set; } = null!;
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
@@ -53,15 +53,15 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         {
             text.Clear();
 
-            if (difficultyBeatmap.CurrentObject is null)
+            if (difficultyProvider.CurrentObject is null)
                 return;
 
-            foreach (PropertyInfo property in difficultyBeatmap.CurrentObject.GetType().GetProperties())
-                addResult(property.Name.Titleize(), property.GetValue(difficultyBeatmap.CurrentObject));
+            foreach (PropertyInfo property in difficultyProvider.CurrentObject.GetType().GetProperties())
+                addResult(property.Name.Titleize(), property.GetValue(difficultyProvider.CurrentObject));
 
             // Ignore fields where the name is all uppercase, as per naming convention their constants and it's the only way to identify them.
-            foreach (FieldInfo field in difficultyBeatmap.CurrentObject.GetType().GetFields().Where(x => x.Name.Any(x => char.IsLetter(x) && !char.IsUpper(x))))
-                addResult(field.Name.Titleize(), field.GetValue(difficultyBeatmap.CurrentObject));
+            foreach (FieldInfo field in difficultyProvider.CurrentObject.GetType().GetFields().Where(x => x.Name.Any(x => char.IsLetter(x) && !char.IsUpper(x))))
+                addResult(field.Name.Titleize(), field.GetValue(difficultyProvider.CurrentObject));
         }
 
         private void addResult(string name, object? value)

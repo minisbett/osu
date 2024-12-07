@@ -18,7 +18,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
     internal partial class OsuDifficultyEvaluatorInspector : EditorToolboxGroup
     {
         [Resolved]
-        private DifficultyEditorBeatmap difficultyBeatmap { get; set; } = null!;
+        private EditorDifficultyProvider difficultyProvider { get; set; } = null!;
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
@@ -52,15 +52,15 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
         {
             text.Clear();
 
-            if (difficultyBeatmap.CurrentObject is null)
+            if (difficultyProvider.CurrentObject is null)
                 return;
 
-            addResult("Aim (withSliderTravelDistance = false)", AimEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, false));
-            addResult("Aim (withSliderTravelDistance = true)", AimEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, true));
-            addResult("Speed", SpeedEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject));
-            addResult("Rhythm", RhythmEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject));
-            addResult("Flashlight (hidden = false)", FlashlightEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, false));
-            addResult("Flashlight (hidden = true)", FlashlightEvaluator.EvaluateDifficultyOf(difficultyBeatmap.CurrentObject, true));
+            addResult("Aim (withSliderTravelDistance = false)", AimEvaluator.EvaluateDifficultyOf(difficultyProvider.CurrentObject, false));
+            addResult("Aim (withSliderTravelDistance = true)", AimEvaluator.EvaluateDifficultyOf(difficultyProvider.CurrentObject, true));
+            addResult("Speed", SpeedEvaluator.EvaluateDifficultyOf(difficultyProvider.CurrentObject));
+            addResult("Rhythm", RhythmEvaluator.EvaluateDifficultyOf(difficultyProvider.CurrentObject));
+            addResult("Flashlight (hidden = false)", FlashlightEvaluator.EvaluateDifficultyOf(difficultyProvider.CurrentObject, false));
+            addResult("Flashlight (hidden = true)", FlashlightEvaluator.EvaluateDifficultyOf(difficultyProvider.CurrentObject, true));
         }
 
         private void addResult(string name, double value, int decimals = 5)

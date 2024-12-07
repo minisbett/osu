@@ -16,7 +16,7 @@ using osu.Game.Screens.Edit;
 
 namespace osu.Game.Rulesets.Difficulty.Editor
 {
-    public partial class DifficultyEditorBeatmap : Component
+    public partial class EditorDifficultyProvider : Component
     {
         [Resolved]
         private Screens.Edit.Editor editor { get; set; } = null!;
