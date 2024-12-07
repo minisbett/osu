@@ -11,7 +11,6 @@ using osu.Game.Graphics;
 using osu.Game.Rulesets.Edit;
 using System.Reflection;
 using Humanizer;
-using System;
 
 namespace osu.Game.Rulesets.Difficulty.Editor
 {
