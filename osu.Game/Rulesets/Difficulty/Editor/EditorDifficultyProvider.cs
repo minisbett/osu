@@ -92,8 +92,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
 
         private void createDifficultyHitObjects()
         {
-            MethodInfo createDifficultyHitObjects = diffCalc.GetType().GetMethod("CreateDifficultyHitObjects", BindingFlags.NonPublic)!;
-            difficultyHitObjects = ((IEnumerable<DifficultyHitObject>)createDifficultyHitObjects.Invoke(diffCalc, [editorBeatmap.PlayableBeatmap, 1])!).ToArray();
+            difficultyHitObjects = diffCalc.CreateDifficultyHitObjectsPublic(editorBeatmap.PlayableBeatmap, 1).ToArray();
         }
 
         private void calculateTimedDifficultyAttributes()
