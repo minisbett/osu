@@ -56,7 +56,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 if (!editor.UseTimelineIfNoSelection.Value)
                     return null;
 
-                return difficultyHitObjects.LastOrDefault(x => x.StartTime < editorClock.CurrentTime);
+                return difficultyHitObjects.LastOrDefault(x => x.StartTime <= editorClock.CurrentTime);
             }
         }
 
