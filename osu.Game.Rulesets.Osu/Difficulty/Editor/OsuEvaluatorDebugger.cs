@@ -44,7 +44,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Editor
             {
                 Debugger.Break();
                 bool hidden = false;
-                AimEvaluator.EvaluateDifficultyOf(obj, hidden);
+                FlashlightEvaluator.EvaluateDifficultyOf(obj, hidden);
             }
         }
     }
