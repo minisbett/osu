@@ -2,7 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -88,7 +90,11 @@ namespace osu.Game.Rulesets.Difficulty.Editor
             Scheduler.Add(calculateTimedDifficultyAttributes);
         }
 
-        private void createDifficultyHitObjects() => difficultyHitObjects = diffCalc.CreateDifficultyHitObjects(editorBeatmap.PlayableBeatmap, 1).ToArray();
+        private void createDifficultyHitObjects()
+        {
+            MethodInfo createDifficultyHitObjects = diffCalc.GetType().GetMethod("CreateDifficultyHitObjects", BindingFlags.NonPublic)!;
+            difficultyHitObjects = ((IEnumerable<DifficultyHitObject>)createDifficultyHitObjects.Invoke(diffCalc, [editorBeatmap.PlayableBeatmap, 1])!).ToArray();
+        }
 
         private void calculateTimedDifficultyAttributes()
         {
@@ -97,7 +103,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                 Beatmap clonedBeatmap = editorBeatmap.PlayableBeatmap.Serialize().Deserialize<Beatmap>();
                 DifficultyCalculator diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(clonedBeatmap));
                 timedDifficultyAttributes = diffCalc.CalculateTimed([], default).ToArray();
-                Scheduler.AddDelayed(calculateTimedDifficultyAttributes, 500);
+                Scheduler.AddDelayed(calculateTimedDifficultyAttributes, 1000);
             });
         }
 
