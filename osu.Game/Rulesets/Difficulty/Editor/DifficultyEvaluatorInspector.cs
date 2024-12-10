@@ -55,7 +55,9 @@ namespace osu.Game.Rulesets.Difficulty.Editor
         {
             text.Clear();
 
-            if (difficultyProvider.CurrentObject is null)
+            DifficultyHitObject? obj = difficultyProvider.GetCurrentObject();
+
+            if (obj is null)
                 return;
 
             foreach (Evaluator eval in Evaluators)
@@ -67,7 +69,7 @@ namespace osu.Game.Rulesets.Difficulty.Editor
                     s.Colour = colourProvider.Content2;
                 });
 
-                text.AddParagraph(Math.Round(eval.EvaluateDifficultyOf(difficultyProvider.CurrentObject), 5).ToString(), s =>
+                text.AddParagraph(Math.Round(eval.EvaluateDifficultyOf(obj), 5).ToString(), s =>
                 {
                     s.Font = s.Font.With(weight: FontWeight.SemiBold);
                     s.Colour = colourProvider.Content1;
