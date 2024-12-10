@@ -86,24 +86,23 @@ namespace osu.Game.Rulesets.Difficulty.Editor
             ruleset = rulesetInfo.Value.CreateInstance();
             diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(editorBeatmap.PlayableBeatmap));
 
-            Scheduler.AddDelayed(createDifficultyHitObjects, 20, true);
-            Scheduler.Add(calculateTimedDifficultyAttributes);
-        }
-
-        private void createDifficultyHitObjects()
-        {
-            difficultyHitObjects = diffCalc.CreateDifficultyHitObjectsPublic(editorBeatmap.PlayableBeatmap, 1).ToArray();
-        }
-
-        private void calculateTimedDifficultyAttributes()
-        {
-            Task.Factory.StartNew(() =>
+            Task.Factory.StartNew(async () =>
             {
-                Beatmap clonedBeatmap = editorBeatmap.PlayableBeatmap.Serialize().Deserialize<Beatmap>();
-                DifficultyCalculator diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(clonedBeatmap));
-                timedDifficultyAttributes = diffCalc.CalculateTimed([], default).ToArray();
-                Scheduler.AddDelayed(calculateTimedDifficultyAttributes, 1000);
-            });
+                difficultyHitObjects = diffCalc.CreateDifficultyHitObjectsPublic(editorBeatmap.PlayableBeatmap, 1).ToArray();
+                await Task.Delay(20).ConfigureAwait(true);
+            }, TaskCreationOptions.LongRunning);
+
+            Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    Beatmap clonedBeatmap = editorBeatmap.PlayableBeatmap.Serialize().Deserialize<Beatmap>();
+                    clonedBeatmap.ControlPointInfo = editorBeatmap.PlayableBeatmap.ControlPointInfo.DeepClone();
+                    DifficultyCalculator diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(clonedBeatmap));
+                    timedDifficultyAttributes = diffCalc.CalculateTimed([], default).ToArray();
+                    await Task.Delay(1000).ConfigureAwait(true);
+                }
+            }, TaskCreationOptions.LongRunning);
         }
 
         /// <summary>
