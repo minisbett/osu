@@ -46,6 +46,9 @@ namespace osu.Game.Rulesets.Difficulty.Editor
             {
                 while (true)
                 {
+                    if (!editor.CalculateDifficultyAttributes.Value)
+                        continue;
+
                     //long start = Stopwatch.GetTimestamp();
                     IBeatmap clonedBeatmap = DifficultyEditorUtils.CloneBeatmap(editorBeatmap.PlayableBeatmap);
                     DifficultyCalculator diffCalc = ruleset.CreateDifficultyCalculator(new FlatWorkingBeatmap(clonedBeatmap));
