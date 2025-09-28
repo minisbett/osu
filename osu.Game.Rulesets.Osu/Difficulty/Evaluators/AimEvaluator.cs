@@ -6,6 +6,7 @@ using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Utils;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
+using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
 {
@@ -148,6 +149,19 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Evaluators
                 // Reward sliders based on velocity.
                 sliderBonus = osuLastObj.TravelDistance / osuLastObj.TravelTime;
             }
+
+            Vector2 delta = (osuCurrObj.BaseObject as OsuHitObject)!.Position - (osuLastObj.BaseObject as OsuHitObject)!.Position;
+            double angle = Math.Atan2(delta.X, delta.Y);
+            const double min_nerf_mult = 0.85;
+            double angleWrapped = ((angle - Math.PI / 4) % (Math.PI / 2) + Math.PI / 2) % (Math.PI / 2);
+            double mult = 1 - (1 - min_nerf_mult) * Math.Abs(angleWrapped <= Math.PI / 4 ? angleWrapped : angleWrapped - Math.PI / 2) / (Math.PI / 4);
+            mult = 1 + (mult - 1) * DifficultyCalculationUtils.Smootherstep(osuCurrObj.LazyJumpDistance, diameter, diameter * 2);
+
+            osuCurrObj.EasyAngleRepeatAntiStrain = min_nerf_mult * Math.Pow(1.1 / min_nerf_mult, (osuLastObj.EasyAngleRepeatAntiStrain - min_nerf_mult) / (1 - min_nerf_mult));
+            osuCurrObj.EasyAngleRepeatAntiStrain *= mult;
+            osuCurrObj.EasyAngleRepeatAntiStrain = Math.Clamp(osuCurrObj.EasyAngleRepeatAntiStrain, min_nerf_mult, 1);
+            osuCurrObj.EasyAngleRepeatAntiStrain += mult > osuLastObj.EasyAngleRepeatAntiStrain ? (mult - osuLastObj.EasyAngleRepeatAntiStrain) / 2 : 0;
+            aimStrain *= osuCurrObj.EasyAngleRepeatAntiStrain;
 
             aimStrain += wiggleBonus * wiggle_multiplier;
             aimStrain += velocityChangeBonus * velocity_change_multiplier;

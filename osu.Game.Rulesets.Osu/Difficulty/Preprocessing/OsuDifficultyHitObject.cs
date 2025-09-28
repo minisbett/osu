@@ -110,6 +110,8 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
         /// </summary>
         public double SmallCircleBonus { get; private set; }
 
+        public double EasyAngleRepeatAntiStrain { get; set; }
+
         private readonly OsuDifficultyHitObject? lastLastDifficultyObject;
         private readonly OsuDifficultyHitObject? lastDifficultyObject;
 
