@@ -107,45 +107,65 @@ namespace osu.Game.Rulesets.Difficulty
         /// <returns>The set of <see cref="TimedDifficultyAttributes"/>.</returns>
         public List<TimedDifficultyAttributes> CalculateTimed([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
         {
+            List<TimedDifficultyAttributes> list = [];
             using var timedCancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             if (!cancellationToken.CanBeCanceled)
                 cancellationToken = timedCancellationSource.Token;
 
+            foreach (var timedAttr in CalculateTimedLazy(mods, cancellationToken))
+            {
+                list.Add(timedAttr);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Lazily calculates the difficulty of the beatmap on-demand using a specific mod combination and yields <see cref="TimedDifficultyAttributes"/> representing the difficulty until every relevant time value in the beatmap.
+        /// </summary>
+        /// <remarks>
+        /// Preprocessing is done before this method returns.
+        /// </remarks>
+        /// <param name="mods">The mods that should be applied to the beatmap.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The enumerated <see cref="TimedDifficultyAttributes"/>.</returns>
+        public IEnumerable<TimedDifficultyAttributes> CalculateTimedLazy([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
+        {
             cancellationToken.ThrowIfCancellationRequested();
             // ReSharper disable once PossiblyMistakenUseOfCancellationToken
             preProcess(mods, cancellationToken);
 
-            var attribs = new List<TimedDifficultyAttributes>();
-
             if (!Beatmap.HitObjects.Any())
-                return attribs;
+                return [];
 
             var skills = CreateSkills(Beatmap, playableMods, clockRate);
             var progressiveBeatmap = new ProgressiveCalculationBeatmap(Beatmap);
             var difficultyObjects = getDifficultyHitObjects().ToArray();
+            return enumerateTimed();
 
-            int currentIndex = 0;
-
-            foreach (var obj in Beatmap.HitObjects)
+            IEnumerable<TimedDifficultyAttributes> enumerateTimed()
             {
-                progressiveBeatmap.HitObjects.Add(obj);
+                int currentIndex = 0;
 
-                while (currentIndex < difficultyObjects.Length && difficultyObjects[currentIndex].BaseObject.GetEndTime() <= obj.GetEndTime())
+                foreach (var obj in Beatmap.HitObjects)
                 {
-                    foreach (var skill in skills)
+                    progressiveBeatmap.HitObjects.Add(obj);
+
+                    while (currentIndex < difficultyObjects.Length && difficultyObjects[currentIndex].BaseObject.GetEndTime() <= obj.GetEndTime())
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        skill.Process(difficultyObjects[currentIndex]);
+                        foreach (var skill in skills)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            skill.Process(difficultyObjects[currentIndex]);
+                        }
+
+                        currentIndex++;
                     }
 
-                    currentIndex++;
+                    yield return new TimedDifficultyAttributes(obj.GetEndTime(), CreateDifficultyAttributes(progressiveBeatmap, playableMods, skills, clockRate));
                 }
-
-                attribs.Add(new TimedDifficultyAttributes(obj.GetEndTime(), CreateDifficultyAttributes(progressiveBeatmap, playableMods, skills, clockRate)));
             }
-
-            return attribs;
         }
 
         /// <summary>
