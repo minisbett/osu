@@ -8,13 +8,14 @@ using osu.Game.Rulesets.Difficulty.Utils;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Taiko.Difficulty.Evaluators;
 using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Taiko.Objects;
 
 namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
 {
     /// <summary>
     /// Calculates the stamina coefficient of taiko difficulty.
     /// </summary>
-    public class Stamina : StrainSkill
+    public class Stamina : StrainSkill<TaikoDifficultyHitObject, TaikoHitObject>
     {
         private double skillMultiplier => 1.1;
         private double strainDecayBase => 0.4;
@@ -39,14 +40,13 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
 
         private double strainDecay(double ms) => Math.Pow(strainDecayBase, ms / 1000);
 
-        protected override double StrainValueAt(DifficultyHitObject current)
+        protected override double StrainValueAt(TaikoDifficultyHitObject current)
         {
             currentStrain *= strainDecay(current.DeltaTime);
             double staminaDifficulty = StaminaEvaluator.EvaluateDifficultyOf(current) * skillMultiplier;
 
             // Safely prevents previous strains from shifting as new notes are added.
-            var currentObject = current as TaikoDifficultyHitObject;
-            int index = currentObject?.ColourData.MonoStreak?.HitObjects.IndexOf(currentObject) ?? 0;
+            int index = current.ColourData.MonoStreak?.HitObjects.IndexOf(current) ?? 0;
 
             double monoLengthBonus = isConvert ? 1.0 : 1.0 + 0.5 * DifficultyCalculationUtils.ReverseLerp(index, 5, 20);
 
@@ -61,7 +61,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
             return SingleColourStamina ? DifficultyCalculationUtils.Logistic(-(index - 10) / 2.0, currentStrain) : currentStrain;
         }
 
-        protected override double CalculateInitialStrain(double time, DifficultyHitObject current) =>
+        protected override double CalculateInitialStrain(double time, TaikoDifficultyHitObject current) =>
             SingleColourStamina
                 ? 0
                 : currentStrain * strainDecay(time - current.Previous(0).StartTime);

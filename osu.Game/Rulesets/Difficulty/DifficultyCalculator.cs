@@ -24,6 +24,24 @@ namespace osu.Game.Rulesets.Difficulty
     public abstract class DifficultyCalculator
     {
         /// <summary>
+        /// A yymmdd version which is used to discern when reprocessing is required.
+        /// </summary>
+        public virtual int Version => 0;
+
+        public abstract DifficultyAttributes Calculate(CancellationToken cancellationToken = default);
+
+        public abstract DifficultyAttributes Calculate(IEnumerable<Mod> mods, CancellationToken cancellationToken = default);
+
+        public abstract List<TimedDifficultyAttributes> CalculateTimed(CancellationToken cancellationToken = default);
+
+        public abstract List<TimedDifficultyAttributes> CalculateTimed(IEnumerable<Mod> mods, CancellationToken cancellationToken = default);
+
+        public abstract IEnumerable<DifficultyAttributes> CalculateAllLegacyCombinations(CancellationToken cancellationToken = default);
+    }
+
+    public abstract class DifficultyCalculator<TDifficultyHitObject, THitObject> : DifficultyCalculator where TDifficultyHitObject : DifficultyHitObject<TDifficultyHitObject, THitObject> where THitObject : HitObject
+    {
+        /// <summary>
         /// The beatmap for which difficulty will be calculated.
         /// </summary>
         protected IBeatmap Beatmap { get; private set; }
@@ -38,11 +56,6 @@ namespace osu.Game.Rulesets.Difficulty
 
         private readonly IRulesetInfo ruleset;
 
-        /// <summary>
-        /// A yymmdd version which is used to discern when reprocessing is required.
-        /// </summary>
-        public virtual int Version => 0;
-
         protected DifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
         {
             this.ruleset = ruleset;
@@ -54,7 +67,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A structure describing the difficulty of the beatmap.</returns>
-        public DifficultyAttributes Calculate(CancellationToken cancellationToken = default)
+        public sealed override DifficultyAttributes Calculate(CancellationToken cancellationToken = default)
             => Calculate(Array.Empty<Mod>(), cancellationToken);
 
         /// <summary>
@@ -63,7 +76,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// <param name="mods">The mods that should be applied to the beatmap.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A structure describing the difficulty of the beatmap.</returns>
-        public DifficultyAttributes Calculate([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
+        public sealed override DifficultyAttributes Calculate([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
         {
             using var timedCancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -96,7 +109,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The set of <see cref="TimedDifficultyAttributes"/>.</returns>
-        public List<TimedDifficultyAttributes> CalculateTimed(CancellationToken cancellationToken = default)
+        public sealed override List<TimedDifficultyAttributes> CalculateTimed(CancellationToken cancellationToken = default)
             => CalculateTimed(Array.Empty<Mod>(), cancellationToken);
 
         /// <summary>
@@ -105,7 +118,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// <param name="mods">The mods that should be applied to the beatmap.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The set of <see cref="TimedDifficultyAttributes"/>.</returns>
-        public List<TimedDifficultyAttributes> CalculateTimed([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
+        public sealed override List<TimedDifficultyAttributes> CalculateTimed([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
         {
             using var timedCancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -155,7 +168,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// This can only be used to compute difficulties for legacy mod combinations.
         /// </remarks>
         /// <returns>A collection of structures describing the difficulty of the beatmap for each mod combination.</returns>
-        public IEnumerable<DifficultyAttributes> CalculateAllLegacyCombinations(CancellationToken cancellationToken = default)
+        public sealed override IEnumerable<DifficultyAttributes> CalculateAllLegacyCombinations(CancellationToken cancellationToken = default)
         {
             var rulesetInstance = ruleset.CreateInstance();
 
@@ -174,7 +187,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// <summary>
         /// Retrieves the <see cref="DifficultyHitObject"/>s to calculate against.
         /// </summary>
-        private IEnumerable<DifficultyHitObject> getDifficultyHitObjects() => SortObjects(CreateDifficultyHitObjects(Beatmap, clockRate));
+        private IEnumerable<TDifficultyHitObject> getDifficultyHitObjects() => SortObjects(CreateDifficultyHitObjects(Beatmap, clockRate));
 
         /// <summary>
         /// Performs required tasks before every calculation.
@@ -194,7 +207,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// </summary>
         /// <param name="input">The <see cref="DifficultyHitObject"/>s to sort.</param>
         /// <returns>The sorted <see cref="DifficultyHitObject"/>s.</returns>
-        protected virtual IEnumerable<DifficultyHitObject> SortObjects(IEnumerable<DifficultyHitObject> input)
+        protected virtual IEnumerable<TDifficultyHitObject> SortObjects(IEnumerable<TDifficultyHitObject> input)
             => input.OrderBy(h => h.BaseObject.StartTime);
 
         /// <summary>
@@ -278,7 +291,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// <param name="mods">The <see cref="Mod"/>s that difficulty was calculated with.</param>
         /// <param name="skills">The skills which processed the beatmap.</param>
         /// <param name="clockRate">The rate at which the gameplay clock is run at.</param>
-        protected abstract DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate);
+        protected abstract DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill<TDifficultyHitObject>[] skills, double clockRate);
 
         /// <summary>
         /// Enumerates <see cref="DifficultyHitObject"/>s to be processed from <see cref="HitObject"/>s in the <see cref="IBeatmap"/>.
@@ -286,7 +299,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// <param name="beatmap">The <see cref="IBeatmap"/> providing the <see cref="HitObject"/>s to enumerate.</param>
         /// <param name="clockRate">The rate at which the gameplay clock is run at.</param>
         /// <returns>The enumerated <see cref="DifficultyHitObject"/>s.</returns>
-        protected abstract IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate);
+        protected abstract IEnumerable<TDifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate);
 
         /// <summary>
         /// Creates the <see cref="Skill"/>s to calculate the difficulty of an <see cref="IBeatmap"/>.
@@ -296,7 +309,7 @@ namespace osu.Game.Rulesets.Difficulty
         /// <param name="mods">Mods to calculate difficulty with.</param>
         /// <param name="clockRate">Clockrate to calculate difficulty with.</param>
         /// <returns>The <see cref="Skill"/>s.</returns>
-        protected abstract Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate);
+        protected abstract Skill<TDifficultyHitObject>[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate);
 
         /// <summary>
         /// Used to calculate timed difficulty attributes, where only a subset of hitobjects should be visible at any point in time.

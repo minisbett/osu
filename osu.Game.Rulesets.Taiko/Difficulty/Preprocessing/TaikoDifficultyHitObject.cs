@@ -17,7 +17,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing
     /// <summary>
     /// Represents a single hit object in taiko difficulty calculation.
     /// </summary>
-    public class TaikoDifficultyHitObject : DifficultyHitObject, IHasInterval
+    public class TaikoDifficultyHitObject : DifficultyHitObject<TaikoDifficultyHitObject, TaikoHitObject>, IHasInterval
     {
         /// <summary>
         /// The list of all <see cref="TaikoDifficultyHitObject"/> of the same colour as this <see cref="TaikoDifficultyHitObject"/> in the beatmap.
@@ -69,8 +69,8 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Preprocessing
         /// <param name="index">The position of this <see cref="DifficultyHitObject"/> in the <paramref name="objects"/> list.</param>
         /// <param name="controlPointInfo">The control point info of the beatmap.</param>
         /// <param name="globalSliderVelocity">The global slider velocity of the beatmap.</param>
-        public TaikoDifficultyHitObject(HitObject hitObject, HitObject lastObject, double clockRate,
-                                        List<DifficultyHitObject> objects,
+        public TaikoDifficultyHitObject(TaikoHitObject hitObject, TaikoHitObject lastObject, double clockRate,
+                                        List<TaikoDifficultyHitObject> objects,
                                         List<TaikoDifficultyHitObject> centreHitObjects,
                                         List<TaikoDifficultyHitObject> rimHitObjects,
                                         List<TaikoDifficultyHitObject> noteObjects, int index,

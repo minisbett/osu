@@ -2,16 +2,15 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Linq;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mania.Objects;
 using osu.Game.Rulesets.Objects;
 
 namespace osu.Game.Rulesets.Mania.Difficulty.Preprocessing
 {
-    public class ManiaDifficultyHitObject : DifficultyHitObject
+    public class ManiaDifficultyHitObject : DifficultyHitObject<ManiaDifficultyHitObject, ManiaHitObject>
     {
-        public new ManiaHitObject BaseObject => (ManiaHitObject)base.BaseObject;
-
         private readonly List<DifficultyHitObject>[] perColumnObjects;
 
         private readonly int columnIndex;
@@ -23,7 +22,7 @@ namespace osu.Game.Rulesets.Mania.Difficulty.Preprocessing
 
         public readonly double ColumnStrainTime;
 
-        public ManiaDifficultyHitObject(HitObject hitObject, HitObject lastObject, double clockRate, List<DifficultyHitObject> objects, List<DifficultyHitObject>[] perColumnObjects, int index)
+        public ManiaDifficultyHitObject(ManiaHitObject hitObject, ManiaHitObject lastObject, double clockRate, List<ManiaDifficultyHitObject> objects, List<DifficultyHitObject>[] perColumnObjects, int index)
             : base(hitObject, lastObject, clockRate, objects, index)
         {
             int totalColumns = perColumnObjects.Length;
@@ -35,7 +34,7 @@ namespace osu.Game.Rulesets.Mania.Difficulty.Preprocessing
 
             if (index > 0)
             {
-                ManiaDifficultyHitObject prevNote = (ManiaDifficultyHitObject)objects[index - 1];
+                ManiaDifficultyHitObject prevNote = objects[index - 1];
 
                 for (int i = 0; i < prevNote.PreviousHitObjects.Length; i++)
                     PreviousHitObjects[i] = prevNote.PreviousHitObjects[i];

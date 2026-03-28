@@ -18,7 +18,7 @@ using osu.Game.Rulesets.Mods;
 
 namespace osu.Game.Rulesets.Catch.Difficulty
 {
-    public class CatchDifficultyCalculator : DifficultyCalculator
+    public class CatchDifficultyCalculator : DifficultyCalculator<CatchDifficultyHitObject, PalpableCatchHitObject>
     {
         private const double difficulty_multiplier = 4.59;
 
@@ -31,7 +31,7 @@ namespace osu.Game.Rulesets.Catch.Difficulty
         {
         }
 
-        protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate)
+        protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill<CatchDifficultyHitObject>[] skills, double clockRate)
         {
             if (beatmap.HitObjects.Count == 0)
                 return new CatchDifficultyAttributes { Mods = mods };
@@ -46,11 +46,11 @@ namespace osu.Game.Rulesets.Catch.Difficulty
             return attributes;
         }
 
-        protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
+        protected override IEnumerable<CatchDifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
         {
-            CatchHitObject? lastObject = null;
+            PalpableCatchHitObject? lastObject = null;
 
-            List<DifficultyHitObject> objects = new List<DifficultyHitObject>();
+            List<CatchDifficultyHitObject> objects = new List<CatchDifficultyHitObject>();
 
             // In 2B beatmaps, it is possible that a normal Fruit is placed in the middle of a JuiceStream.
             foreach (var hitObject in CatchBeatmap.GetPalpableObjects(beatmap.HitObjects))
@@ -68,14 +68,14 @@ namespace osu.Game.Rulesets.Catch.Difficulty
             return objects;
         }
 
-        protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate)
+        protected override Skill<CatchDifficultyHitObject>[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate)
         {
             halfCatcherWidth = Catcher.CalculateCatchWidth(beatmap.Difficulty) * 0.5f;
 
             // For circle sizes above 5.5, reduce the catcher width further to simulate imperfect gameplay.
             halfCatcherWidth *= 1 - (Math.Max(0, beatmap.Difficulty.CircleSize - 5.5f) * 0.0625f);
 
-            return new Skill[]
+            return new Skill<CatchDifficultyHitObject>[]
             {
                 new Movement(mods, halfCatcherWidth, clockRate),
             };

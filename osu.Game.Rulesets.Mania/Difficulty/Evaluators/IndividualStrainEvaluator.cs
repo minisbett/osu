@@ -2,16 +2,15 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Utils;
-using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mania.Difficulty.Preprocessing;
 
 namespace osu.Game.Rulesets.Mania.Difficulty.Evaluators
 {
     public class IndividualStrainEvaluator
     {
-        public static double EvaluateDifficultyOf(DifficultyHitObject current)
+        public static double EvaluateDifficultyOf(ManiaDifficultyHitObject current)
         {
-            var maniaCurrent = (ManiaDifficultyHitObject)current;
+            var maniaCurrent = current;
             double startTime = maniaCurrent.StartTime;
             double endTime = maniaCurrent.EndTime;
 

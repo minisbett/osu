@@ -13,7 +13,7 @@ using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
 {
-    public class OsuDifficultyHitObject : DifficultyHitObject
+    public class OsuDifficultyHitObject : DifficultyHitObject<OsuDifficultyHitObject, OsuHitObject>
     {
         /// <summary>
         /// A distance by which all distances should be scaled in order to assume a uniform circle size.
@@ -26,9 +26,6 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
 
         private const float maximum_slider_radius = NORMALISED_RADIUS * 2.4f;
         private const float assumed_slider_radius = NORMALISED_RADIUS * 1.8f;
-
-        protected new OsuHitObject BaseObject => (OsuHitObject)base.BaseObject;
-        protected new OsuHitObject LastObject => (OsuHitObject)base.LastObject;
 
         /// <summary>
         /// <see cref="DifficultyHitObject.DeltaTime"/> capped to a minimum of <see cref="MIN_DELTA_TIME"/>ms.
@@ -113,11 +110,11 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
         private readonly OsuDifficultyHitObject? lastLastDifficultyObject;
         private readonly OsuDifficultyHitObject? lastDifficultyObject;
 
-        public OsuDifficultyHitObject(HitObject hitObject, HitObject lastObject, double clockRate, List<DifficultyHitObject> objects, int index)
+        public OsuDifficultyHitObject(OsuHitObject hitObject, OsuHitObject lastObject, double clockRate, List<OsuDifficultyHitObject> objects, int index)
             : base(hitObject, lastObject, clockRate, objects, index)
         {
-            lastLastDifficultyObject = index > 1 ? (OsuDifficultyHitObject)objects[index - 2] : null;
-            lastDifficultyObject = index > 0 ? (OsuDifficultyHitObject)objects[index - 1] : null;
+            lastLastDifficultyObject = index > 1 ? objects[index - 2] : null;
+            lastDifficultyObject = index > 0 ? objects[index - 1] : null;
 
             // Capped to 25ms to prevent difficulty calculation breaking from simultaneous objects.
             AdjustedDeltaTime = Math.Max(DeltaTime, MIN_DELTA_TIME);

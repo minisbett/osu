@@ -9,6 +9,7 @@ using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Difficulty.Skills;
 using osu.Game.Rulesets.Osu.Difficulty.Utils;
@@ -19,7 +20,7 @@ using osu.Game.Rulesets.Scoring;
 
 namespace osu.Game.Rulesets.Osu.Difficulty
 {
-    public class OsuDifficultyCalculator : DifficultyCalculator
+    public class OsuDifficultyCalculator : DifficultyCalculator<OsuDifficultyHitObject, OsuHitObject>
     {
         private const double star_rating_multiplier = 0.0265;
 
@@ -46,7 +47,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             return (79.5 - hitWindowGreat) / 6;
         }
 
-        protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate)
+        protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill<OsuDifficultyHitObject>[] skills, double clockRate)
         {
             if (beatmap.HitObjects.Count == 0)
                 return new OsuDifficultyAttributes { Mods = mods };
@@ -163,23 +164,23 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             return Math.Cbrt(OsuPerformanceCalculator.PERFORMANCE_BASE_MULTIPLIER) * star_rating_multiplier * (Math.Cbrt(100000 / Math.Pow(2, 1 / 1.1) * basePerformance) + 4);
         }
 
-        protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
+        protected override IEnumerable<OsuDifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
         {
-            List<DifficultyHitObject> objects = new List<DifficultyHitObject>();
+            List<OsuDifficultyHitObject> objects = new List<OsuDifficultyHitObject>();
 
             // The first jump is formed by the first two hitobjects of the map.
             // If the map has less than two OsuHitObjects, the enumerator will not return anything.
             for (int i = 1; i < beatmap.HitObjects.Count; i++)
             {
-                objects.Add(new OsuDifficultyHitObject(beatmap.HitObjects[i], beatmap.HitObjects[i - 1], clockRate, objects, objects.Count));
+                objects.Add(new OsuDifficultyHitObject((OsuHitObject)beatmap.HitObjects[i], (OsuHitObject)beatmap.HitObjects[i - 1], clockRate, objects, objects.Count));
             }
 
             return objects;
         }
 
-        protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate)
+        protected override Skill<OsuDifficultyHitObject>[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate)
         {
-            var skills = new List<Skill>
+            var skills = new List<Skill<OsuDifficultyHitObject>>
             {
                 new Aim(mods, true),
                 new Aim(mods, false),

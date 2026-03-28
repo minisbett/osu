@@ -6,13 +6,15 @@ using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Difficulty.Utils;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Taiko.Difficulty.Evaluators;
+using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Taiko.Objects;
 
 namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
 {
     /// <summary>
     /// Calculates the rhythm coefficient of taiko difficulty.
     /// </summary>
-    public class Rhythm : StrainDecaySkill
+    public class Rhythm : StrainDecaySkill<TaikoDifficultyHitObject, TaikoHitObject>
     {
         protected override double SkillMultiplier => 1.0;
         protected override double StrainDecayBase => 0.4;
@@ -25,7 +27,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty.Skills
             this.greatHitWindow = greatHitWindow;
         }
 
-        protected override double StrainValueOf(DifficultyHitObject current)
+        protected override double StrainValueOf(TaikoDifficultyHitObject current)
         {
             double difficulty = RhythmEvaluator.EvaluateDifficultyOf(current, greatHitWindow);
 

@@ -3,20 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Game.Rulesets.Catch.Objects;
 using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Objects;
 
 namespace osu.Game.Rulesets.Catch.Difficulty.Preprocessing
 {
-    public class CatchDifficultyHitObject : DifficultyHitObject
+    public class CatchDifficultyHitObject : DifficultyHitObject<CatchDifficultyHitObject, PalpableCatchHitObject>
     {
         public const float NORMALIZED_HALF_CATCHER_WIDTH = 41.0f;
         private const float absolute_player_positioning_error = 16.0f;
-
-        public new PalpableCatchHitObject BaseObject => (PalpableCatchHitObject)base.BaseObject;
-
-        public new PalpableCatchHitObject LastObject => (PalpableCatchHitObject)base.LastObject;
 
         /// <summary>
         /// Normalized position of <see cref="BaseObject"/>.
@@ -59,7 +56,7 @@ namespace osu.Game.Rulesets.Catch.Difficulty.Preprocessing
         /// </summary>
         public readonly double StrainTime;
 
-        public CatchDifficultyHitObject(HitObject hitObject, HitObject lastObject, double clockRate, float halfCatcherWidth, List<DifficultyHitObject> objects, int index)
+        public CatchDifficultyHitObject(PalpableCatchHitObject hitObject, PalpableCatchHitObject lastObject, double clockRate, float halfCatcherWidth, List<CatchDifficultyHitObject> objects, int index)
             : base(hitObject, lastObject, clockRate, objects, index)
         {
             // We will scale everything by this factor, so we can assume a uniform CircleSize among beatmaps.
@@ -76,7 +73,7 @@ namespace osu.Game.Rulesets.Catch.Difficulty.Preprocessing
 
         private void setMovementState()
         {
-            LastPlayerPosition = Index == 0 ? LastNormalizedPosition : ((CatchDifficultyHitObject)Previous(0)).PlayerPosition;
+            LastPlayerPosition = Index == 0 ? LastNormalizedPosition : Previous(0).PlayerPosition;
 
             PlayerPosition = Math.Clamp(
                 LastPlayerPosition,

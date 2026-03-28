@@ -11,9 +11,9 @@ namespace osu.Game.Rulesets.Catch.Difficulty.Evaluators
     {
         private const double direction_change_bonus = 21.0;
 
-        public static double EvaluateDifficultyOf(DifficultyHitObject current, double catcherSpeedMultiplier)
+        public static double EvaluateDifficultyOf(CatchDifficultyHitObject current, double catcherSpeedMultiplier)
         {
-            var catchCurrent = (CatchDifficultyHitObject)current;
+            var catchCurrent = current;
             var catchLast = (CatchDifficultyHitObject)current.Previous(0);
             var catchLastLast = (CatchDifficultyHitObject)current.Previous(1);
 

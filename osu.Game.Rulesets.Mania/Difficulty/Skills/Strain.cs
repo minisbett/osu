@@ -6,11 +6,12 @@ using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mania.Difficulty.Evaluators;
 using osu.Game.Rulesets.Mania.Difficulty.Preprocessing;
+using osu.Game.Rulesets.Mania.Objects;
 using osu.Game.Rulesets.Mods;
 
 namespace osu.Game.Rulesets.Mania.Difficulty.Skills
 {
-    public class Strain : StrainDecaySkill
+    public class Strain : StrainDecaySkill<ManiaDifficultyHitObject, ManiaHitObject>
     {
         private const double individual_decay_base = 0.125;
         private const double overall_decay_base = 0.30;
@@ -29,9 +30,9 @@ namespace osu.Game.Rulesets.Mania.Difficulty.Skills
             overallStrain = 1;
         }
 
-        protected override double StrainValueOf(DifficultyHitObject current)
+        protected override double StrainValueOf(ManiaDifficultyHitObject current)
         {
-            var maniaCurrent = (ManiaDifficultyHitObject)current;
+            var maniaCurrent = current;
 
             individualStrains[maniaCurrent.Column] = applyDecay(individualStrains[maniaCurrent.Column], maniaCurrent.ColumnStrainTime, individual_decay_base);
             individualStrains[maniaCurrent.Column] += IndividualStrainEvaluator.EvaluateDifficultyOf(current);
@@ -47,7 +48,7 @@ namespace osu.Game.Rulesets.Mania.Difficulty.Skills
             return highestIndividualStrain + overallStrain - CurrentStrain;
         }
 
-        protected override double CalculateInitialStrain(double offset, DifficultyHitObject current) =>
+        protected override double CalculateInitialStrain(double offset, ManiaDifficultyHitObject current) =>
             applyDecay(highestIndividualStrain, offset - current.Previous(0).StartTime, individual_decay_base)
             + applyDecay(overallStrain, offset - current.Previous(0).StartTime, overall_decay_base);
 

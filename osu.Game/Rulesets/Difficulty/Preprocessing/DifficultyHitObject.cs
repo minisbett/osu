@@ -8,12 +8,14 @@ using osu.Game.Rulesets.Objects;
 
 namespace osu.Game.Rulesets.Difficulty.Preprocessing
 {
+    public class DifficultyHitObject;
+
     /// <summary>
     /// Wraps a <see cref="HitObject"/> and provides additional information to be used for difficulty calculation.
     /// </summary>
-    public class DifficultyHitObject
+    public class DifficultyHitObject<TDifficultyHitObject, THitObject> : DifficultyHitObject where TDifficultyHitObject : DifficultyHitObject<TDifficultyHitObject, THitObject> where THitObject : HitObject
     {
-        private readonly IReadOnlyList<DifficultyHitObject> difficultyHitObjects;
+        private readonly IReadOnlyList<TDifficultyHitObject> difficultyHitObjects;
 
         /// <summary>
         /// The index of this <see cref="DifficultyHitObject"/> in the list of all <see cref="DifficultyHitObject"/>s.
@@ -23,12 +25,12 @@ namespace osu.Game.Rulesets.Difficulty.Preprocessing
         /// <summary>
         /// The <see cref="HitObject"/> this <see cref="DifficultyHitObject"/> wraps.
         /// </summary>
-        public readonly HitObject BaseObject;
+        public readonly THitObject BaseObject;
 
         /// <summary>
         /// The last <see cref="HitObject"/> which occurs before <see cref="BaseObject"/>.
         /// </summary>
-        public readonly HitObject LastObject;
+        public readonly THitObject LastObject;
 
         /// <summary>
         /// Amount of time elapsed between <see cref="BaseObject"/> and <see cref="LastObject"/>, adjusted by clockrate.
@@ -53,7 +55,7 @@ namespace osu.Game.Rulesets.Difficulty.Preprocessing
         /// <param name="clockRate">The rate at which the gameplay clock is run at.</param>
         /// <param name="objects">The list of <see cref="DifficultyHitObject"/>s in the current beatmap.</param>
         /// <param name="index">The index of this <see cref="DifficultyHitObject"/> in <paramref name="objects"/> list.</param>
-        public DifficultyHitObject(HitObject hitObject, HitObject lastObject, double clockRate, List<DifficultyHitObject> objects, int index)
+        public DifficultyHitObject(THitObject hitObject, THitObject lastObject, double clockRate, List<TDifficultyHitObject> objects, int index)
         {
             difficultyHitObjects = objects;
             Index = index;
@@ -64,13 +66,13 @@ namespace osu.Game.Rulesets.Difficulty.Preprocessing
             EndTime = hitObject.GetEndTime() / clockRate;
         }
 
-        public DifficultyHitObject Previous(int backwardsIndex)
+        public TDifficultyHitObject Previous(int backwardsIndex)
         {
             int index = Index - (backwardsIndex + 1);
             return index >= 0 && index < difficultyHitObjects.Count ? difficultyHitObjects[index] : null;
         }
 
-        public DifficultyHitObject Next(int forwardsIndex)
+        public TDifficultyHitObject Next(int forwardsIndex)
         {
             int index = Index + (forwardsIndex + 1);
             return index >= 0 && index < difficultyHitObjects.Count ? difficultyHitObjects[index] : null;

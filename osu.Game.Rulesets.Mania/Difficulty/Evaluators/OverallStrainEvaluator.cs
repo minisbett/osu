@@ -13,9 +13,9 @@ namespace osu.Game.Rulesets.Mania.Difficulty.Evaluators
     {
         private const double release_threshold = 30;
 
-        public static double EvaluateDifficultyOf(DifficultyHitObject current)
+        public static double EvaluateDifficultyOf(ManiaDifficultyHitObject current)
         {
-            var maniaCurrent = (ManiaDifficultyHitObject)current;
+            var maniaCurrent = current;
             double startTime = maniaCurrent.StartTime;
             double endTime = maniaCurrent.EndTime;
             bool isOverlapping = false;

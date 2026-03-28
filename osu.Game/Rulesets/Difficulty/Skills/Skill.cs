@@ -13,7 +13,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
     /// <remarks>
     /// This class should be considered a "processing" class and not persisted.
     /// </remarks>
-    public abstract class Skill
+    public abstract class Skill<T> where T : DifficultyHitObject
     {
         /// <summary>
         /// Mods for use in skill calculations.
@@ -31,7 +31,7 @@ namespace osu.Game.Rulesets.Difficulty.Skills
         /// Process a <see cref="DifficultyHitObject"/>.
         /// </summary>
         /// <param name="current">The <see cref="DifficultyHitObject"/> to process.</param>
-        public abstract void Process(DifficultyHitObject current);
+        public abstract void Process(T current);
 
         /// <summary>
         /// Returns the calculated difficulty value representing all <see cref="DifficultyHitObject"/>s that have been processed up to this point.
