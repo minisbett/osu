@@ -241,6 +241,9 @@ namespace osu.Game.Rulesets.Difficulty
         /// <returns>The <see cref="Skill"/>s.</returns>
         protected abstract Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate);
 
+        /// <summary>
+        /// Represents a progressive (per-object), lazy (step-by-step) calculation of timed difficulty attributes of a beatmap.
+        /// </summary>
         public class ProgressiveCalculation
         {
             private readonly DifficultyCalculator calculator;
@@ -251,8 +254,19 @@ namespace osu.Game.Rulesets.Difficulty
             private int currentHitObjectIndex;
             private int currentDifficultyObjectIndex;
 
+            /// <summary>
+            /// Bool whether there are more hit objects to process in the beatmap.
+            /// </summary>
             public bool HasMore => currentHitObjectIndex < calculator.Beatmap.HitObjects.Count;
 
+            /// <summary>
+            /// Creates a processive calculation operation with a difficulty calculator of the provided ruleset.
+            /// </summary>
+            /// <param name="ruleset">The <see cref="IRulesetInfo"/> to create the difficulty calculator with.</param>
+            /// <param name="beatmap">The <see cref="IBeatmap"/> for which difficulty will be calculated.</param>
+            /// <param name="mods">Mods to calculate difficulty with.</param>
+            /// <param name="cancellationToken">The cancellation token.</param>
+            /// <returns>An object representing a progressive difficulty calculation operation.</returns>
             public static ProgressiveCalculation Create(IRulesetInfo ruleset, IWorkingBeatmap beatmap, [NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
                 => new ProgressiveCalculation(ruleset.CreateInstance().CreateDifficultyCalculator(beatmap), mods, cancellationToken);
 
@@ -268,6 +282,10 @@ namespace osu.Game.Rulesets.Difficulty
                 difficultyObjects = this.calculator.getDifficultyHitObjects().ToArray();
             }
 
+            /// <summary>
+            /// Processes the next hit object in the beatmap. Throws if all hit objects have been processed.
+            /// </summary>
+            /// <param name="cancellationToken">The cancellation token.</param>
             public void ProcessNext(CancellationToken cancellationToken = default)
             {
                 if (!HasMore)
@@ -289,15 +307,17 @@ namespace osu.Game.Rulesets.Difficulty
                 }
             }
 
+            /// <summary>
+            /// Creates <see cref="TimedDifficultyAttributes"/> to describe beatmap's calculated difficulty up to the last processed hit object. Throws if no hit object was processed yet.
+            /// </summary>
+            /// <returns>The timed difficulty attributes up to the last processed hit object.</returns>
             public TimedDifficultyAttributes CreateTimedDifficultyAttributes()
             {
                 if (progressiveBeatmap.HitObjects.Count == 0)
                     throw new InvalidOperationException("No hit objects have been processed yet.");
 
-                var latestProcessedObject = progressiveBeatmap.HitObjects[^1];
-
                 DifficultyAttributes attributes = calculator.CreateDifficultyAttributes(progressiveBeatmap, calculator.playableMods, skills, calculator.clockRate);
-                return new TimedDifficultyAttributes(latestProcessedObject.GetEndTime(), attributes);
+                return new TimedDifficultyAttributes(progressiveBeatmap.HitObjects[^1].GetEndTime(), attributes);
             }
         }
 
