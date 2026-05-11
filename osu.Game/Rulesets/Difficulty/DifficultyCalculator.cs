@@ -255,6 +255,11 @@ namespace osu.Game.Rulesets.Difficulty
             private int currentDifficultyObjectIndex;
 
             /// <summary>
+            /// The <see cref="IBeatmap"/> this calculation progresses over.
+            /// </summary>
+            public IBeatmap Beatmap => calculator.Beatmap;
+
+            /// <summary>
             /// Bool whether there are more hit objects to process in the beatmap.
             /// </summary>
             public bool HasMore => currentHitObjectIndex < calculator.Beatmap.HitObjects.Count;
