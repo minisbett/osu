@@ -92,63 +92,6 @@ namespace osu.Game.Rulesets.Difficulty
         }
 
         /// <summary>
-        /// Calculates the difficulty of the beatmap with no mods applied and returns a set of <see cref="TimedDifficultyAttributes"/> representing the difficulty at every relevant time value in the beatmap.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>The set of <see cref="TimedDifficultyAttributes"/>.</returns>
-        public List<TimedDifficultyAttributes> CalculateTimed(CancellationToken cancellationToken = default)
-            => CalculateTimed(Array.Empty<Mod>(), cancellationToken);
-
-        /// <summary>
-        /// Calculates the difficulty of the beatmap using a specific mod combination and returns a set of <see cref="TimedDifficultyAttributes"/> representing the difficulty at every relevant time value in the beatmap.
-        /// </summary>
-        /// <param name="mods">The mods that should be applied to the beatmap.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>The set of <see cref="TimedDifficultyAttributes"/>.</returns>
-        public List<TimedDifficultyAttributes> CalculateTimed([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
-        {
-            using var timedCancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-            if (!cancellationToken.CanBeCanceled)
-                cancellationToken = timedCancellationSource.Token;
-
-            cancellationToken.ThrowIfCancellationRequested();
-            // ReSharper disable once PossiblyMistakenUseOfCancellationToken
-            preProcess(mods, cancellationToken);
-
-            var attribs = new List<TimedDifficultyAttributes>();
-
-            if (!Beatmap.HitObjects.Any())
-                return attribs;
-
-            var skills = CreateSkills(Beatmap, playableMods, clockRate);
-            var progressiveBeatmap = new ProgressiveCalculationBeatmap(Beatmap);
-            var difficultyObjects = getDifficultyHitObjects().ToArray();
-
-            int currentIndex = 0;
-
-            foreach (var obj in Beatmap.HitObjects)
-            {
-                progressiveBeatmap.HitObjects.Add(obj);
-
-                while (currentIndex < difficultyObjects.Length && difficultyObjects[currentIndex].BaseObject.GetEndTime() <= obj.GetEndTime())
-                {
-                    foreach (var skill in skills)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        skill.Process(difficultyObjects[currentIndex]);
-                    }
-
-                    currentIndex++;
-                }
-
-                attribs.Add(new TimedDifficultyAttributes(obj.GetEndTime(), CreateDifficultyAttributes(progressiveBeatmap, playableMods, skills, clockRate)));
-            }
-
-            return attribs;
-        }
-
-        /// <summary>
         /// Calculates the difficulty of the beatmap using all mod combinations applicable to the beatmap.
         /// </summary>
         /// <remarks>
@@ -297,6 +240,66 @@ namespace osu.Game.Rulesets.Difficulty
         /// <param name="clockRate">Clockrate to calculate difficulty with.</param>
         /// <returns>The <see cref="Skill"/>s.</returns>
         protected abstract Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate);
+
+        public class ProgressiveCalculation
+        {
+            private readonly DifficultyCalculator calculator;
+            private readonly Skill[] skills;
+            private readonly DifficultyHitObject[] difficultyObjects;
+            private readonly ProgressiveCalculationBeatmap progressiveBeatmap;
+
+            private int currentHitObjectIndex;
+            private int currentDifficultyObjectIndex;
+
+            public bool HasMore => currentHitObjectIndex < calculator.Beatmap.HitObjects.Count;
+
+            public static ProgressiveCalculation Create(IRulesetInfo ruleset, IWorkingBeatmap beatmap, [NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken = default)
+                => new ProgressiveCalculation(ruleset.CreateInstance().CreateDifficultyCalculator(beatmap), mods, cancellationToken);
+
+            private ProgressiveCalculation(DifficultyCalculator calculator, [NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken)
+            {
+                this.calculator = calculator;
+
+                cancellationToken.ThrowIfCancellationRequested();
+                this.calculator.preProcess(mods, cancellationToken);
+
+                skills = this.calculator.CreateSkills(this.calculator.Beatmap, this.calculator.playableMods, this.calculator.clockRate);
+                progressiveBeatmap = new ProgressiveCalculationBeatmap(this.calculator.Beatmap);
+                difficultyObjects = this.calculator.getDifficultyHitObjects().ToArray();
+            }
+
+            public void ProcessNext(CancellationToken cancellationToken = default)
+            {
+                if (!HasMore)
+                    throw new InvalidOperationException("No more hit objects to process.");
+
+                var hitObject = calculator.Beatmap.HitObjects[currentHitObjectIndex];
+                currentHitObjectIndex++;
+                progressiveBeatmap.HitObjects.Add(hitObject);
+
+                while (currentDifficultyObjectIndex < difficultyObjects.Length && difficultyObjects[currentDifficultyObjectIndex].BaseObject.GetEndTime() <= hitObject.GetEndTime())
+                {
+                    foreach (var skill in skills)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        skill.Process(difficultyObjects[currentDifficultyObjectIndex]);
+                    }
+
+                    currentDifficultyObjectIndex++;
+                }
+            }
+
+            public TimedDifficultyAttributes CreateTimedDifficultyAttributes()
+            {
+                if (progressiveBeatmap.HitObjects.Count == 0)
+                    throw new InvalidOperationException("No hit objects have been processed yet.");
+
+                var latestProcessedObject = progressiveBeatmap.HitObjects[^1];
+
+                DifficultyAttributes attributes = calculator.CreateDifficultyAttributes(progressiveBeatmap, calculator.playableMods, skills, calculator.clockRate);
+                return new TimedDifficultyAttributes(latestProcessedObject.GetEndTime(), attributes);
+            }
+        }
 
         /// <summary>
         /// Used to calculate timed difficulty attributes, where only a subset of hitobjects should be visible at any point in time.
