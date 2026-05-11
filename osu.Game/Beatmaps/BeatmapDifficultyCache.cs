@@ -197,6 +197,11 @@ namespace osu.Game.Beatmaps
 
         public Task<List<TimedDifficultyAttributes>> GetTimedDifficultyAttributesAsync(IWorkingBeatmap beatmap, Ruleset ruleset, Mod[] mods, CancellationToken cancellationToken = default)
         {
+            using var timedCancellationSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            if (!cancellationToken.CanBeCanceled)
+                cancellationToken = timedCancellationSource.Token;
+
             return Task.Factory.StartNew(() =>
                 {
                     var attributes = new List<TimedDifficultyAttributes>();
