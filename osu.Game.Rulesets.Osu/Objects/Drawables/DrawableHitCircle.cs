@@ -14,6 +14,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Judgements;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Skinning;
 using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Osu.UI;
@@ -256,7 +257,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             public HitReceptor()
             {
-                Size = OsuHitObject.OBJECT_DIMENSIONS;
+                Size = OsuHitObject.OBJECT_DIMENSIONS + new Vector2(OsuModNoClip.StaticTolerance);
 
                 Anchor = Anchor.Centre;
                 Origin = Anchor.Centre;

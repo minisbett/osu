@@ -12,6 +12,7 @@ using osu.Framework.Input.Events;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Screens.Play;
 using osuTK;
 
@@ -23,6 +24,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// Whether the slider is currently being tracked.
         /// </summary>
         public bool Tracking { get; private set; }
+
+        public int AdditionalFollowRadiusTolerance { get; set; }
 
         [Resolved]
         private IGameplayClock? gameplayClock { get; set; }
@@ -206,7 +209,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (expanded)
                 radius *= DrawableSliderBall.FOLLOW_AREA;
 
-            return radius;
+            return radius + AdditionalFollowRadiusTolerance + OsuModNoClip.StaticTolerance;
         }
 
         /// <summary>

@@ -198,7 +198,8 @@ namespace osu.Game.Rulesets.Osu
                         new MultiMod(new OsuModAutoplay(), new OsuModCinema()),
                         new OsuModRelax(),
                         new OsuModAutopilot(),
-                        new OsuModSpunOut(),
+                        new OsuModNoClip(),
+                        new OsuModSpunOut()
                     };
 
                 case ModType.Fun:
