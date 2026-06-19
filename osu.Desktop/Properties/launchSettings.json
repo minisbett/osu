@@ -1,7 +1,13 @@
 {
   "profiles": {
     "osu! Desktop": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "environmentVariables": {
+        "PIPEWIRE_ALSA": "{ alsa.period-bytes=1024 alsa.periods=3 }",
+        "SDL_VIDEODRIVER": "wayland", 
+        "SDL_VIDEO_DOUBLE_BUFFER": "1",
+        "OSU_SDL3": "1"
+      }
     },
     "osu! Tournament": {
       "commandName": "Project",
