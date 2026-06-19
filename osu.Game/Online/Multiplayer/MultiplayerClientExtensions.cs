@@ -33,7 +33,7 @@ namespace osu.Game.Online.Multiplayer
                     if (exception.GetHubExceptionMessage() is string message)
                     {
                         // Hub exceptions generally contain something we can show the user directly.
-                        Logger.Log(message, level: LogLevel.Important);
+                        //Logger.Log(message, level: LogLevel.Important);
                         return;
                     }
 
