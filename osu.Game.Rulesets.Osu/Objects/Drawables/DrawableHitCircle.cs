@@ -4,14 +4,18 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
 using osu.Game.Graphics.Containers;
 using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Judgements;
 using osu.Game.Rulesets.Osu.Mods;
@@ -19,6 +23,7 @@ using osu.Game.Rulesets.Osu.Skinning;
 using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.Scoring;
+using osu.Game.Rulesets.UI;
 using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
@@ -175,12 +180,34 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             return null;
         }
 
+        [Resolved]
+        private Bindable<IReadOnlyList<Mod>> SelectedMods { get; set; }
+
         /// <summary>
         /// Retrieves the <see cref="HitResult"/> for a time offset.
         /// </summary>
         /// <param name="timeOffset">The time offset.</param>
         /// <returns>The hit result, or <see cref="HitResult.None"/> if <paramref name="timeOffset"/> doesn't result in a judgement.</returns>
-        protected virtual HitResult ResultFor(double timeOffset) => HitObject.HitWindows.ResultFor(timeOffset);
+        protected virtual HitResult ResultFor(double timeOffset)
+        {
+            if (SelectedMods.Value.FirstOrDefault(x => x is OsuModNoClip) is OsuModNoClip noClip)
+            {
+                float distance = Vector2.Distance(ScreenSpaceDrawQuad.Centre, HitArea.ClosestPressPosition!.Value);
+                float tolerance = OsuModNoClip.StaticTolerance + noClip.Tolerance.Value;
+                float originalRadius = 100;
+
+                if (distance <= originalRadius)
+                    return HitResult.Great;
+                if (distance <= originalRadius + tolerance * 0.7)
+                    return HitResult.Ok;
+                if (distance <= originalRadius + tolerance)
+                    return HitResult.Meh;
+
+                return HitResult.None;
+            }
+
+            return HitObject.HitWindows.ResultFor(timeOffset);
+        }
 
         protected override void UpdateInitialTransforms()
         {
